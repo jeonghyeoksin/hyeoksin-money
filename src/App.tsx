@@ -8,7 +8,9 @@ import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download } from 'lucide-react';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import { saveAs } from "file-saver";
 
 export default function App() {
   const [currentStatus, setCurrentStatus] = useState('');
@@ -31,6 +33,69 @@ export default function App() {
     localStorage.setItem('gemini_api_key', tempKey);
     setApiKey(tempKey);
     setShowKeyModal(false);
+  };
+
+  const getCleanedResult = (text: string) => {
+    // Find the start of the actual content, usually marked by "1. 수익화 아이디어" or similar.
+    const match = text.match(/^(#*\s*\**1\.\s*\**수익화.*)/m);
+    if (match && match.index !== undefined) {
+      return text.substring(match.index).trim();
+    }
+    return text;
+  };
+
+  const handleDownloadMd = () => {
+    if (!result) return;
+    const cleanedResult = getCleanedResult(result);
+    const blob = new Blob([cleanedResult], { type: 'text/markdown;charset=utf-8' });
+    saveAs(blob, '수익화_로드맵.md');
+  };
+
+  const handleDownloadDocx = async () => {
+    if (!result) return;
+    const cleanedResult = getCleanedResult(result);
+    const lines = cleanedResult.split("\n");
+    const children = lines.map(line => {
+      if (line.startsWith("# ")) {
+        return new Paragraph({ text: line.replace("# ", ""), heading: HeadingLevel.HEADING_1 });
+      } else if (line.startsWith("## ")) {
+        return new Paragraph({ text: line.replace("## ", ""), heading: HeadingLevel.HEADING_2 });
+      } else if (line.startsWith("### ")) {
+        return new Paragraph({ text: line.replace("### ", ""), heading: HeadingLevel.HEADING_3 });
+      } else if (line.startsWith("- ")) {
+        return new Paragraph({ text: line.replace("- ", ""), bullet: { level: 0 } });
+      } else if (line.trim() === "") {
+        return new Paragraph({ text: "" });
+      } else {
+        const parts = line.split(/(\*\*.*?\*\*|<span[^>]*>.*?<\/span>)/g);
+        const textRuns = parts.filter(Boolean).map(part => {
+          if (part.startsWith("**") && part.endsWith("**")) {
+            return new TextRun({ text: part.slice(2, -2), bold: true });
+          } else if (part.startsWith("<span") && part.endsWith("</span>")) {
+            const match = part.match(/<span[^>]*style="[^"]*color:\s*([^;"]+)[^"]*"[^>]*>(.*?)<\/span>/i);
+            if (match) {
+              const color = match[1].trim().replace('#', '');
+              const text = match[2];
+              return new TextRun({ text: text, color: color, bold: part.includes('font-weight: bold') || part.includes('font-weight:bold') });
+            }
+            const textMatch = part.match(/<span[^>]*>(.*?)<\/span>/i);
+            return new TextRun({ text: textMatch ? textMatch[1] : part });
+          }
+          return new TextRun({ text: part });
+        });
+        return new Paragraph({ children: textRuns });
+      }
+    });
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: children,
+      }],
+    });
+
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "수익화_로드맵.docx");
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -388,9 +453,27 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                 </p>
               </div>
             ) : (
-              <div className="prose prose-invert prose-yellow max-w-none overflow-y-auto pr-4 custom-scrollbar flex-1">
-                <div className="markdown-body">
-                  <Markdown rehypePlugins={[rehypeRaw]}>{result}</Markdown>
+              <div className="flex flex-col h-full absolute inset-0 p-6 sm:p-8">
+                <div className="flex justify-end gap-3 mb-4 shrink-0 relative z-20">
+                  <button
+                    onClick={handleDownloadDocx}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600/90 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] backdrop-blur-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    DOCX 다운로드
+                  </button>
+                  <button
+                    onClick={handleDownloadMd}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-700/90 hover:bg-zinc-600 text-white text-sm font-bold rounded-xl transition-all shadow-lg backdrop-blur-md"
+                  >
+                    <Download className="w-4 h-4" />
+                    MD 다운로드
+                  </button>
+                </div>
+                <div className="prose prose-invert prose-yellow max-w-none overflow-y-auto pr-4 custom-scrollbar flex-1 relative z-10">
+                  <div className="markdown-body">
+                    <Markdown rehypePlugins={[rehypeRaw]}>{result}</Markdown>
+                  </div>
                 </div>
               </div>
             )}
