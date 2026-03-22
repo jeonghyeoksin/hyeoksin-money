@@ -3,16 +3,71 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, AlertCircle } from 'lucide-react';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import { saveAs } from "file-saver";
 
+// Error Boundary Component
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
+          <div className="bg-zinc-900 border border-red-500/30 p-8 rounded-2xl max-w-lg w-full text-center space-y-6 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
+            <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-white">오류가 발생했습니다</h2>
+              <p className="text-zinc-400">화면을 불러오는 중 문제가 발생했습니다. 새로고침 후 다시 시도해주세요.</p>
+            </div>
+            <button 
+              onClick={() => window.location.reload()}
+              className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
+            >
+              새로고침하기
+            </button>
+            {this.state.error && (
+              <pre className="text-left bg-black/50 p-4 rounded-lg text-xs text-zinc-500 overflow-auto max-h-40">
+                {this.state.error.toString()}
+              </pre>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export default function App() {
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
+  );
+}
+
+function MainApp() {
   const [currentStatus, setCurrentStatus] = useState('');
   const [interest, setInterest] = useState('');
   const [skills, setSkills] = useState('');
@@ -24,6 +79,44 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const [progress, setProgress] = useState(0);
+  const [loadingStep, setLoadingStep] = useState('');
+
+  const loadingSteps = [
+    { threshold: 10, text: '사용자 정보 분석 중...' },
+    { threshold: 30, text: '수익 모델 브레인스토밍 중...' },
+    { threshold: 50, text: '최적의 파이프라인 선정 중...' },
+    { threshold: 70, text: '단계별 실행 로드맵 설계 중...' },
+    { threshold: 90, text: '최종 문서화 및 스타일 적용 중...' },
+  ];
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (loading) {
+      setProgress(0);
+      setLoadingStep(loadingSteps[0].text);
+      
+      interval = setInterval(() => {
+        setProgress(prev => {
+          const next = prev + Math.random() * 5;
+          if (next >= 99) {
+            clearInterval(interval);
+            return 99;
+          }
+          
+          // Update step text based on progress
+          const currentStep = loadingSteps.find(step => next <= step.threshold) || loadingSteps[loadingSteps.length - 1];
+          setLoadingStep(currentStep.text);
+          
+          return next;
+        });
+      }, 400);
+    } else {
+      setProgress(0);
+      setLoadingStep('');
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -443,14 +536,53 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                 </div>
               </div>
             ) : loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-6">
-                <div className="relative">
-                  <div className="w-16 h-16 border-4 border-zinc-800 rounded-full"></div>
-                  <div className="w-16 h-16 border-4 border-yellow-500 rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
+              <div className="flex-1 flex flex-col items-center justify-center space-y-8">
+                <div className="relative w-32 h-32">
+                  <svg className="w-full h-full" viewBox="0 0 100 100">
+                    <circle
+                      className="text-zinc-800 stroke-current"
+                      strokeWidth="8"
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                    ></circle>
+                    <motion.circle
+                      className="text-yellow-500 stroke-current"
+                      strokeWidth="8"
+                      strokeLinecap="round"
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="transparent"
+                      initial={{ strokeDasharray: "0 251.2" }}
+                      animate={{ strokeDasharray: `${(progress / 100) * 251.2} 251.2` }}
+                      transition={{ duration: 0.5 }}
+                    ></motion.circle>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-2xl font-bold text-white">{Math.round(progress)}%</span>
+                  </div>
                 </div>
-                <p className="text-yellow-500 font-medium animate-pulse text-center">
-                  정혁신의 AI가 최적의 수익화 모델을<br />브레인스토밍 중입니다...
-                </p>
+                
+                <div className="text-center space-y-3">
+                  <p className="text-yellow-500 font-bold text-lg animate-pulse">
+                    {loadingStep}
+                  </p>
+                  <p className="text-zinc-500 text-sm">
+                    정혁신의 AI가 최적의 수익화 모델을 설계하고 있습니다.<br />
+                    잠시만 기다려주세요.
+                  </p>
+                </div>
+
+                <div className="w-full max-w-xs bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-gradient-to-r from-yellow-500 to-red-500"
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.5 }}
+                  />
+                </div>
               </div>
             ) : (
               <div className="flex flex-col h-full absolute inset-0 p-6 sm:p-8">
