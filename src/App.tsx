@@ -3,71 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
+import { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, AlertCircle } from 'lucide-react';
-import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
-import { saveAs } from "file-saver";
-
-// Error Boundary Component
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: Error | null }> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Uncaught error:", error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6">
-          <div className="bg-zinc-900 border border-red-500/30 p-8 rounded-2xl max-w-lg w-full text-center space-y-6 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
-            <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-              <AlertCircle className="w-8 h-8 text-red-500" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold text-white">오류가 발생했습니다</h2>
-              <p className="text-zinc-400">화면을 불러오는 중 문제가 발생했습니다. 새로고침 후 다시 시도해주세요.</p>
-            </div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="bg-red-600 hover:bg-red-500 text-white px-6 py-3 rounded-xl font-bold transition-all"
-            >
-              새로고침하기
-            </button>
-            {this.state.error && (
-              <pre className="text-left bg-black/50 p-4 rounded-lg text-xs text-zinc-500 overflow-auto max-h-40">
-                {this.state.error.toString()}
-              </pre>
-            )}
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download } from 'lucide-react';
 
 export default function App() {
-  return (
-    <ErrorBoundary>
-      <MainApp />
-    </ErrorBoundary>
-  );
-}
-
-function MainApp() {
   const [currentStatus, setCurrentStatus] = useState('');
   const [interest, setInterest] = useState('');
   const [skills, setSkills] = useState('');
@@ -79,44 +22,6 @@ function MainApp() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [loadingStep, setLoadingStep] = useState('');
-
-  const loadingSteps = [
-    { threshold: 10, text: '사용자 정보 분석 중...' },
-    { threshold: 30, text: '수익 모델 브레인스토밍 중...' },
-    { threshold: 50, text: '최적의 파이프라인 선정 중...' },
-    { threshold: 70, text: '단계별 실행 로드맵 설계 중...' },
-    { threshold: 90, text: '최종 문서화 및 스타일 적용 중...' },
-  ];
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (loading) {
-      setProgress(0);
-      setLoadingStep(loadingSteps[0].text);
-      
-      interval = setInterval(() => {
-        setProgress(prev => {
-          const next = prev + Math.random() * 5;
-          if (next >= 99) {
-            clearInterval(interval);
-            return 99;
-          }
-          
-          // Update step text based on progress
-          const currentStep = loadingSteps.find(step => next <= step.threshold) || loadingSteps[loadingSteps.length - 1];
-          setLoadingStep(currentStep.text);
-          
-          return next;
-        });
-      }, 400);
-    } else {
-      setProgress(0);
-      setLoadingStep('');
-    }
-    return () => clearInterval(interval);
-  }, [loading]);
 
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -126,69 +31,6 @@ function MainApp() {
     localStorage.setItem('gemini_api_key', tempKey);
     setApiKey(tempKey);
     setShowKeyModal(false);
-  };
-
-  const getCleanedResult = (text: string) => {
-    // Find the start of the actual content, usually marked by "1. 수익화 아이디어" or similar.
-    const match = text.match(/^(#*\s*\**1\.\s*\**수익화.*)/m);
-    if (match && match.index !== undefined) {
-      return text.substring(match.index).trim();
-    }
-    return text;
-  };
-
-  const handleDownloadMd = () => {
-    if (!result) return;
-    const cleanedResult = getCleanedResult(result);
-    const blob = new Blob([cleanedResult], { type: 'text/markdown;charset=utf-8' });
-    saveAs(blob, '수익화_로드맵.md');
-  };
-
-  const handleDownloadDocx = async () => {
-    if (!result) return;
-    const cleanedResult = getCleanedResult(result);
-    const lines = cleanedResult.split("\n");
-    const children = lines.map(line => {
-      if (line.startsWith("# ")) {
-        return new Paragraph({ text: line.replace("# ", ""), heading: HeadingLevel.HEADING_1 });
-      } else if (line.startsWith("## ")) {
-        return new Paragraph({ text: line.replace("## ", ""), heading: HeadingLevel.HEADING_2 });
-      } else if (line.startsWith("### ")) {
-        return new Paragraph({ text: line.replace("### ", ""), heading: HeadingLevel.HEADING_3 });
-      } else if (line.startsWith("- ")) {
-        return new Paragraph({ text: line.replace("- ", ""), bullet: { level: 0 } });
-      } else if (line.trim() === "") {
-        return new Paragraph({ text: "" });
-      } else {
-        const parts = line.split(/(\*\*.*?\*\*|<span[^>]*>.*?<\/span>)/g);
-        const textRuns = parts.filter(Boolean).map(part => {
-          if (part.startsWith("**") && part.endsWith("**")) {
-            return new TextRun({ text: part.slice(2, -2), bold: true });
-          } else if (part.startsWith("<span") && part.endsWith("</span>")) {
-            const match = part.match(/<span[^>]*style="[^"]*color:\s*([^;"]+)[^"]*"[^>]*>(.*?)<\/span>/i);
-            if (match) {
-              const color = match[1].trim().replace('#', '');
-              const text = match[2];
-              return new TextRun({ text: text, color: color, bold: part.includes('font-weight: bold') || part.includes('font-weight:bold') });
-            }
-            const textMatch = part.match(/<span[^>]*>(.*?)<\/span>/i);
-            return new TextRun({ text: textMatch ? textMatch[1] : part });
-          }
-          return new TextRun({ text: part });
-        });
-        return new Paragraph({ children: textRuns });
-      }
-    });
-
-    const doc = new Document({
-      sections: [{
-        properties: {},
-        children: children,
-      }],
-    });
-
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, "수익화_로드맵.docx");
   };
 
   const handleGenerate = async (e: React.FormEvent) => {
@@ -256,6 +98,35 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDownload = () => {
+    if (!result) return;
+
+    // Find the start of the actual content (usually starts with "1.")
+    const lines = result.split('\n');
+    let startIndex = -1;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      // Matches "1.", "# 1.", "## 1.", "### 1." etc.
+      if (/^(#+\s*)?1\./.test(line)) {
+        startIndex = i;
+        break;
+      }
+    }
+
+    const contentToDownload = startIndex !== -1 ? lines.slice(startIndex).join('\n') : result;
+
+    const blob = new Blob([contentToDownload], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '수익화_로드맵.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -510,6 +381,23 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-600/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
           <div className="relative z-10 flex-1 flex flex-col">
+            {result && !loading && (
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <div className="bg-yellow-500/20 p-2 rounded-full">
+                    <TrendingUp className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">수익화 분석 결과</h3>
+                </div>
+                <button
+                  onClick={handleDownload}
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  로드맵 다운로드
+                </button>
+              </div>
+            )}
             {!result && !loading ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
                 <div className="relative w-full max-w-lg aspect-[16/10] rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-zinc-700/50 group">
@@ -536,76 +424,19 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                 </div>
               </div>
             ) : loading ? (
-              <div className="flex-1 flex flex-col items-center justify-center space-y-8">
-                <div className="relative w-32 h-32">
-                  <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <circle
-                      className="text-zinc-800 stroke-current"
-                      strokeWidth="8"
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="transparent"
-                    ></circle>
-                    <motion.circle
-                      className="text-yellow-500 stroke-current"
-                      strokeWidth="8"
-                      strokeLinecap="round"
-                      cx="50"
-                      cy="50"
-                      r="40"
-                      fill="transparent"
-                      initial={{ strokeDasharray: "0 251.2" }}
-                      animate={{ strokeDasharray: `${(progress / 100) * 251.2} 251.2` }}
-                      transition={{ duration: 0.5 }}
-                    ></motion.circle>
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-white">{Math.round(progress)}%</span>
-                  </div>
+              <div className="flex-1 flex flex-col items-center justify-center space-y-6">
+                <div className="relative">
+                  <div className="w-16 h-16 border-4 border-zinc-800 rounded-full"></div>
+                  <div className="w-16 h-16 border-4 border-yellow-500 rounded-full border-t-transparent animate-spin absolute top-0 left-0"></div>
                 </div>
-                
-                <div className="text-center space-y-3">
-                  <p className="text-yellow-500 font-bold text-lg animate-pulse">
-                    {loadingStep}
-                  </p>
-                  <p className="text-zinc-500 text-sm">
-                    정혁신의 AI가 최적의 수익화 모델을 설계하고 있습니다.<br />
-                    잠시만 기다려주세요.
-                  </p>
-                </div>
-
-                <div className="w-full max-w-xs bg-zinc-800 h-1.5 rounded-full overflow-hidden">
-                  <motion.div 
-                    className="h-full bg-gradient-to-r from-yellow-500 to-red-500"
-                    initial={{ width: "0%" }}
-                    animate={{ width: `${progress}%` }}
-                    transition={{ duration: 0.5 }}
-                  />
-                </div>
+                <p className="text-yellow-500 font-medium animate-pulse text-center">
+                  정혁신의 AI가 최적의 수익화 모델을<br />브레인스토밍 중입니다...
+                </p>
               </div>
             ) : (
-              <div className="flex flex-col h-full absolute inset-0 p-6 sm:p-8">
-                <div className="flex justify-end gap-3 mb-4 shrink-0 relative z-20">
-                  <button
-                    onClick={handleDownloadDocx}
-                    className="flex items-center gap-2 px-4 py-2 bg-blue-600/90 hover:bg-blue-500 text-white text-sm font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-[0_0_20px_rgba(37,99,235,0.5)] backdrop-blur-md"
-                  >
-                    <Download className="w-4 h-4" />
-                    DOCX 다운로드
-                  </button>
-                  <button
-                    onClick={handleDownloadMd}
-                    className="flex items-center gap-2 px-4 py-2 bg-zinc-700/90 hover:bg-zinc-600 text-white text-sm font-bold rounded-xl transition-all shadow-lg backdrop-blur-md"
-                  >
-                    <Download className="w-4 h-4" />
-                    MD 다운로드
-                  </button>
-                </div>
-                <div className="prose prose-invert prose-yellow max-w-none overflow-y-auto pr-4 custom-scrollbar flex-1 relative z-10">
-                  <div className="markdown-body">
-                    <Markdown rehypePlugins={[rehypeRaw]}>{result}</Markdown>
-                  </div>
+              <div className="prose prose-invert prose-yellow max-w-none overflow-y-auto pr-4 custom-scrollbar flex-1">
+                <div className="markdown-body">
+                  <Markdown rehypePlugins={[rehypeRaw]}>{result}</Markdown>
                 </div>
               </div>
             )}
