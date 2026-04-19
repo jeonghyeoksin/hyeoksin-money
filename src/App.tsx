@@ -10,7 +10,7 @@ import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, FileText } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, FileText, ExternalLink, HelpCircle, Mail, MessageSquare } from 'lucide-react';
 
 export default function App() {
   const [currentStatus, setCurrentStatus] = useState('');
@@ -28,6 +28,7 @@ export default function App() {
 
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [showKeyModal, setShowKeyModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const [tempKey, setTempKey] = useState('');
 
   const handleSaveKey = () => {
@@ -621,6 +622,88 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                     저장하기
                   </button>
                 </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Buttons - Bottom Right */}
+      <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-40">
+        <motion.a
+          whileHover={{ scale: 1.05, x: -5 }}
+          whileTap={{ scale: 0.95 }}
+          href="https://hyeoksinai.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-yellow-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl transition-all group"
+        >
+          <div className="bg-yellow-500/20 p-1.5 rounded-lg group-hover:bg-yellow-500/30 transition-colors">
+            <ExternalLink className="w-4 h-4 text-yellow-500" />
+          </div>
+          <span className="text-sm font-bold tracking-tight">혁신 AI 바로가기</span>
+        </motion.a>
+
+        <motion.button
+          whileHover={{ scale: 1.05, x: -5 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setShowSupportModal(true)}
+          className="flex items-center gap-2 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 hover:border-red-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl transition-all group"
+        >
+          <div className="bg-red-500/20 p-1.5 rounded-lg group-hover:bg-red-500/30 transition-colors">
+            <HelpCircle className="w-4 h-4 text-red-500" />
+          </div>
+          <span className="text-sm font-bold tracking-tight">오류 및 유지보수</span>
+        </motion.button>
+      </div>
+
+      {/* Support / Maintenance Modal */}
+      <AnimatePresence>
+        {showSupportModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="flex items-center justify-between mb-8 relative z-10">
+                <div className="flex items-center gap-3">
+                  <div className="bg-red-500/20 p-3 rounded-2xl">
+                    <MessageSquare className="w-6 h-6 text-red-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-extrabold text-white tracking-tight">고객 지원</h3>
+                    <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Support & Maintenance</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowSupportModal(false)} 
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white p-2 rounded-xl transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-6 relative z-10">
+                <div className="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Mail className="w-5 h-5 text-yellow-500" />
+                    <span className="text-zinc-300 font-bold text-lg">info@nextin.ai.kr</span>
+                  </div>
+                  <p className="text-zinc-400 text-sm leading-relaxed font-medium">
+                    위 이메일로 <span className="text-white font-bold">오류 및 유지보수 요청사항</span>을 발송해주시면, <span className="text-green-400 font-bold">실시간 확인 후 신속하게 피드백</span>을 드립니다.
+                  </p>
+                </div>
+                
+                <button
+                  onClick={() => setShowSupportModal(false)}
+                  className="w-full py-4 rounded-2xl font-bold text-white bg-zinc-800 hover:bg-zinc-700 transition-all shadow-lg"
+                >
+                  닫기
+                </button>
               </div>
             </motion.div>
           </div>
