@@ -3,12 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download } from 'lucide-react';
+import { saveAs } from 'file-saver';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, FileText } from 'lucide-react';
 
 export default function App() {
   const [currentStatus, setCurrentStatus] = useState('');
@@ -22,6 +24,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const isGenerating = useRef(false);
 
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
   const [showKeyModal, setShowKeyModal] = useState(false);
@@ -32,6 +35,13 @@ export default function App() {
     setApiKey(tempKey);
     setShowKeyModal(false);
   };
+
+  useEffect(() => {
+    if (result && !loading && isGenerating.current) {
+      handleDownloadDocx();
+      isGenerating.current = false;
+    }
+  }, [result, loading]);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +61,7 @@ export default function App() {
     setError('');
     setLoading(true);
     setResult('');
+    isGenerating.current = true;
 
     try {
       const ai = new GoogleGenAI({ apiKey: currentKey });
@@ -72,8 +83,9 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 [출력 형식 및 스타일 가이드]
 - 최대한 자세하고 가독성 좋게 작성해주세요.
 - 중요한 키워드나 핵심 내용은 반드시 **굵게(Bold)** 표시하세요.
-- 특히 강조해야 할 핵심 전략이나 경고 사항은 <span style="color: #ef4444; font-weight: bold;">빨간색 텍스트</span>로 작성하세요.
-- 긍정적인 기대 효과, 추천 툴, 참고 링크 등은 <span style="color: #3b82f6; font-weight: bold;">파란색 텍스트</span>로 작성하세요.
+- 강조할 텍스트는 <span style="color: #1d4ed8; font-weight: bold;">진한 파란색</span>으로 작성하세요.
+- 매우 중요한 텍스트는 <span style="color: #dc2626; font-weight: bold;">빨간색</span>으로 작성하세요.
+- 꼭 참조해야 할 사항은 <span style="background-color: #fef08a; font-weight: bold; color: #1f2937;">노란색 배경</span>으로 작성하세요.
 - 마크다운 문법과 HTML 태그(span)를 적절히 혼용하여 시각적으로 훌륭한 문서를 만들어주세요.
 - [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
 - [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
@@ -117,16 +129,121 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     }
 
     const contentToDownload = startIndex !== -1 ? lines.slice(startIndex).join('\n') : result;
+    const fileName = `혁신 수익화 발굴 AI_${currentStatus || '분석'}_${interest || '결과'}`;
 
     const blob = new Blob([contentToDownload], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = '수익화_로드맵.md';
+    a.download = `${fileName}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadDocx = async () => {
+    if (!result) return;
+
+    // Find content starting from "1."
+    const lines = result.split('\n');
+    let startIndex = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (/^(#+\s*)?1\./.test(lines[i].trim())) {
+        startIndex = i;
+        break;
+      }
+    }
+    const cleanLines = startIndex !== -1 ? lines.slice(startIndex) : lines;
+
+    const docChildren: Paragraph[] = [];
+
+    // Title for the document
+    docChildren.push(
+      new Paragraph({
+        text: "혁신 수익화 발굴 AI - 로드맵",
+        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+      })
+    );
+
+    for (const line of cleanLines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) {
+        docChildren.push(new Paragraph({ spacing: { before: 200 } }));
+        continue;
+      }
+
+      // Handle headers
+      if (trimmedLine.startsWith('#')) {
+        const levelMatch = trimmedLine.match(/^#+/);
+        const level = levelMatch ? levelMatch[0].length : 1;
+        const text = trimmedLine.replace(/^#+\s*/, '');
+        docChildren.push(
+          new Paragraph({
+            text: text,
+            heading: level === 1 ? HeadingLevel.HEADING_2 : level === 2 ? HeadingLevel.HEADING_3 : HeadingLevel.HEADING_4,
+            spacing: { before: 240, after: 120 },
+          })
+        );
+        continue;
+      }
+
+      // Complex line parsing for colors/bold
+      const runs: TextRun[] = [];
+      let currentText = trimmedLine;
+
+      // Handle simple list markers
+      if (/^[\d-]\./.test(currentText) || currentText.startsWith('* ') || currentText.startsWith('- ')) {
+        // Just keep the text for now, docx doesn't handle nested markdown easily without a proper library
+      }
+
+      // Regex for bold **text** and span styles
+      // This is a simplified parser for the specific prompt requirements
+      const segments = currentText.split(/(<span.*?>.*?<\/span>|\*\*.*?\*\*)/g);
+
+      for (const segment of segments) {
+        if (!segment) continue;
+
+        if (segment.startsWith('<span')) {
+          const colorMatch = segment.match(/color:\s*(#[a-fA-F0-9]{3,6})/);
+          const bgColorMatch = segment.match(/background-color:\s*(#[a-fA-F0-9]{3,6})/);
+          const text = segment.replace(/<span.*?>|<\/span>/g, '');
+          
+          runs.push(
+            new TextRun({
+              text: text,
+              bold: segment.includes('font-weight: bold'),
+              color: colorMatch ? colorMatch[1].replace('#', '') : undefined,
+              shading: bgColorMatch ? { fill: bgColorMatch[1].replace('#', '') } : undefined,
+            })
+          );
+        } else if (segment.startsWith('**') && segment.endsWith('**')) {
+          runs.push(
+            new TextRun({
+              text: segment.slice(2, -2),
+              bold: true,
+            })
+          );
+        } else {
+          runs.push(new TextRun(segment));
+        }
+      }
+
+      docChildren.push(new Paragraph({ children: runs, spacing: { after: 120 } }));
+    }
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: docChildren,
+      }],
+    });
+
+    const fileName = `혁신 수익화 발굴 AI_${currentStatus || '분석'}_${interest || '결과'}`;
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `${fileName}.docx`);
   };
 
   return (
@@ -389,13 +506,22 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                   </div>
                   <h3 className="text-lg font-bold text-white">수익화 분석 결과</h3>
                 </div>
-                <button
-                  onClick={handleDownload}
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
-                >
-                  <Download className="w-4 h-4" />
-                  로드맵 다운로드
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownload}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
+                  >
+                    <Download className="w-4 h-4" />
+                    MD 다운로드
+                  </button>
+                  <button
+                    onClick={handleDownloadDocx}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all shadow-lg text-sm font-medium"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Word 다운로드
+                  </button>
+                </div>
               </div>
             )}
             {!result && !loading ? (
