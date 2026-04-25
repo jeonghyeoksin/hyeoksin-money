@@ -230,7 +230,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
