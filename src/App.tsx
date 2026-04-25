@@ -106,21 +106,21 @@ const OPTIONS = {
 };
 
 export default function App() {
-  const [currentStatus, setCurrentStatus] = useState('');
-  const [interest, setInterest] = useState('');
-  const [skills, setSkills] = useState('');
-  const [workStyle, setWorkStyle] = useState('');
-  const [time, setTime] = useState('');
-  const [capital, setCapital] = useState('');
-  const [targetIncome, setTargetIncome] = useState('');
-  const [personality, setPersonality] = useState('');
-  const [tools, setTools] = useState('');
-  const [constraints, setConstraints] = useState('');
-  const [urgency, setUrgency] = useState('');
-  const [itSkill, setItSkill] = useState('');
-  const [audience, setAudience] = useState('');
-  const [riskTolerance, setRiskTolerance] = useState('');
-  const [joy, setJoy] = useState('');
+  const [currentStatus, setCurrentStatus] = useState(OPTIONS.currentStatus[0]);
+  const [interest, setInterest] = useState(OPTIONS.interest[0]);
+  const [skills, setSkills] = useState(OPTIONS.skills[4]); // '특별한 기술 없음'
+  const [workStyle, setWorkStyle] = useState(OPTIONS.workStyle[3]); // '비대면/온라인 작업'
+  const [time, setTime] = useState(OPTIONS.time[1]); // '1~2시간'
+  const [capital, setCapital] = useState(OPTIONS.capital[0]);
+  const [targetIncome, setTargetIncome] = useState(OPTIONS.targetIncome[2]); // '100만원'
+  const [personality, setPersonality] = useState(OPTIONS.personality[5]); // '실행력이 빠름'
+  const [tools, setTools] = useState(OPTIONS.tools[1]); // '노트북/PC 보유'
+  const [constraints, setConstraints] = useState(OPTIONS.constraints[4]); // '없음'
+  const [urgency, setUrgency] = useState(OPTIONS.urgency[1]);
+  const [itSkill, setItSkill] = useState(OPTIONS.itSkill[1]);
+  const [audience, setAudience] = useState(OPTIONS.audience[0]);
+  const [riskTolerance, setRiskTolerance] = useState(OPTIONS.riskTolerance[0]);
+  const [joy, setJoy] = useState(OPTIONS.joy[0]);
   
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
@@ -556,6 +556,10 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
             <p className="text-zinc-400 leading-relaxed">
               AI 왕초보자도 쉽게 따라할 수 있는 맞춤형 수익화 로드맵을 제공합니다. 당신의 관심사와 기술을 입력하고 새로운 가능성을 확인해보세요.
             </p>
+            <div className="mt-4 flex items-center gap-2 text-yellow-500/80 bg-yellow-500/5 border border-yellow-500/10 px-4 py-2 rounded-xl text-sm font-medium">
+              <Sparkles className="w-4 h-4" />
+              가장 많이 사용하시는 기본값이 선택되어 있습니다. 본인에 맞게끔 수정하여 사용하시길 권장드립니다.
+            </div>
           </div>
 
           <form onSubmit={handleGenerate} className="space-y-5 bg-zinc-900/80 p-6 sm:p-8 rounded-2xl border border-zinc-800 shadow-2xl backdrop-blur-sm">
