@@ -158,6 +158,14 @@ export default function App() {
     setShowKeyModal(false);
   };
 
+  const handleResetKey = () => {
+    localStorage.removeItem('gemini_api_key');
+    setApiKey('');
+    setTempKey('');
+    setShowKeyModal(false);
+    alert('API Key가 초기화되었습니다. 이제 기본 무료 모드로 작동합니다.');
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
@@ -230,7 +238,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: 'gemini-1.5-flash',
         contents: prompt,
       });
 
@@ -834,20 +842,27 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                   </p>
                 </div>
                 
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => setShowKeyModal(false)}
-                    className="flex-1 px-4 py-3 rounded-xl font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleSaveKey}
-                    className="flex-1 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 transition-colors shadow-lg"
-                  >
-                    저장하기
-                  </button>
-                </div>
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={handleResetKey}
+                      className="px-4 py-3 rounded-xl font-medium text-zinc-400 bg-zinc-800 hover:bg-zinc-700 hover:text-white transition-colors"
+                      title="저장된 키 삭제 및 무료 모드 전환"
+                    >
+                      초기화
+                    </button>
+                    <button
+                      onClick={() => setShowKeyModal(false)}
+                      className="px-4 py-3 rounded-xl font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleSaveKey}
+                      className="flex-1 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 transition-colors shadow-lg"
+                    >
+                      저장하기
+                    </button>
+                  </div>
               </div>
             </motion.div>
           </div>
