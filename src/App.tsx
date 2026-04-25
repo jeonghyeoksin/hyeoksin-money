@@ -230,7 +230,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: prompt,
       });
 
@@ -250,7 +250,12 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       triggerAllDownloads(text);
     } catch (err) {
       console.error(err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
+      let errorMessage = err instanceof Error ? err.message : String(err);
+      
+      if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
+        errorMessage = 'Gemini API 할당량이 소진되었거나 결제 잔액이 부족합니다. AI Studio(https://aistudio.google.com/app/billing)에서 결제 수단을 확인하거나 잠시 후 다시 시도해주세요.';
+      }
+
       setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
     } finally {
       setLoading(false);
