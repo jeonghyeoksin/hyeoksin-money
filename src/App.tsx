@@ -230,19 +230,18 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview',
+        model: 'gemini-3-flash-preview',
         contents: prompt,
       });
 
-      const response = await aiResponse;
-      const text = response.text || '결과를 생성하지 못했습니다.';
+      const text = aiResponse.text || '결과를 생성하지 못했습니다.';
       setResult(text);
       
       // 구체적인 사용량 정보 추출 (SDK 버전에 따라 다를 수 있음)
-      if (response.usageMetadata) {
+      if (aiResponse.usageMetadata) {
         setUsage({
-          promptTokens: response.usageMetadata.promptTokenCount || 0,
-          responseTokens: response.usageMetadata.candidatesTokenCount || 0
+          promptTokens: aiResponse.usageMetadata.promptTokenCount || 0,
+          responseTokens: aiResponse.usageMetadata.candidatesTokenCount || 0
         });
       }
 
@@ -251,7 +250,8 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       triggerAllDownloads(text);
     } catch (err) {
       console.error(err);
-      setError('AI 결과를 가져오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -730,14 +730,14 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={handleDownload}
+                    onClick={() => handleDownload()}
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
                   >
                     <Download className="w-4 h-4" />
                     MD 다운로드
                   </button>
                   <button
-                    onClick={handleDownloadDocx}
+                    onClick={() => handleDownloadDocx()}
                     className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all shadow-lg text-sm font-medium"
                   >
                     <FileText className="w-4 h-4" />
