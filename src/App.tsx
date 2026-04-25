@@ -158,13 +158,6 @@ export default function App() {
     setShowKeyModal(false);
   };
 
-  useEffect(() => {
-    if (result && !loading && isGenerating.current) {
-      handleDownloadDocx();
-      isGenerating.current = false;
-    }
-  }, [result, loading]);
-
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
@@ -242,7 +235,8 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       });
 
       const response = await aiResponse;
-      setResult(response.text || '결과를 생성하지 못했습니다.');
+      const text = response.text || '결과를 생성하지 못했습니다.';
+      setResult(text);
       
       // 구체적인 사용량 정보 추출 (SDK 버전에 따라 다를 수 있음)
       if (response.usageMetadata) {
@@ -251,6 +245,10 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
           responseTokens: response.usageMetadata.candidatesTokenCount || 0
         });
       }
+
+      // Automatically trigger downloads
+      isGenerating.current = true;
+      triggerAllDownloads(text);
     } catch (err) {
       console.error(err);
       setError('AI 결과를 가져오는 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
@@ -259,11 +257,19 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     }
   };
 
-  const handleDownload = () => {
-    if (!result) return;
+  const triggerAllDownloads = async (content: string) => {
+    // Small delay to ensure state update if needed, though we pass content directly
+    handleDownload(content);
+    await handleDownloadDocx(content);
+    isGenerating.current = false;
+  };
+
+  const handleDownload = (content?: string) => {
+    const dataToUse = typeof content === 'string' ? content : result;
+    if (!dataToUse) return;
 
     // Find the start of the actual content (usually starts with "1.")
-    const lines = result.split('\n');
+    const lines = dataToUse.split('\n');
     let startIndex = -1;
     
     for (let i = 0; i < lines.length; i++) {
@@ -275,7 +281,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       }
     }
 
-    const contentToDownload = startIndex !== -1 ? lines.slice(startIndex).join('\n') : result;
+    const contentToDownload = startIndex !== -1 ? lines.slice(startIndex).join('\n') : dataToUse;
     const fileName = `혁신 수익화 발굴 AI_${currentStatus || '분석'}_${interest || '결과'}`;
 
     const blob = new Blob([contentToDownload], { type: 'text/markdown' });
@@ -289,11 +295,12 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     URL.revokeObjectURL(url);
   };
 
-  const handleDownloadDocx = async () => {
-    if (!result) return;
+  const handleDownloadDocx = async (content?: string) => {
+    const dataToUse = typeof content === 'string' ? content : result;
+    if (!dataToUse) return;
 
     // Find content starting from "1."
-    const lines = result.split('\n');
+    const lines = dataToUse.split('\n');
     let startIndex = -1;
     for (let i = 0; i < lines.length; i++) {
       if (/^(#+\s*)?1\./.test(lines[i].trim())) {
