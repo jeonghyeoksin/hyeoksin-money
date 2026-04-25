@@ -230,7 +230,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 `;
 
       const aiResponse = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-3.1-flash-lite-preview',
         contents: prompt,
       });
 
@@ -253,7 +253,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       let errorMessage = err instanceof Error ? err.message : String(err);
       
       if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
-        errorMessage = 'Gemini API 할당량이 소진되었거나 결제 잔액이 부족합니다. AI Studio(https://aistudio.google.com/app/billing)에서 결제 수단을 확인하거나 잠시 후 다시 시도해주세요.';
+        errorMessage = 'Gemini API 무료 할당량을 모두 사용했거나 결제 잔액이 부족합니다. \n1. 잠시 후(약 1분 뒤) 다시 시도해보세요. \n2. 설정(톱니바퀴)에서 API Key를 직접 입력하셨다면, 키를 삭제하여 기본 무료 모드로 전환해보세요.';
       }
 
       setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
