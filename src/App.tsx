@@ -105,6 +105,73 @@ const OPTIONS = {
   joy: ['조용히 무언가 만들기/창작', '사람들과 대화/소통하기', '무언가 분석하고 해결하기', '누군가를 돕고 가르치기', '새로운 곳에 가고 체험하기']
 };
 
+const PATCH_NOTES = [
+  {
+    version: '1.4.2',
+    title: '패치노트 자동화 및 시각적 가시성 개선',
+    date: '2026.04.27',
+    type: 'Update',
+    items: [
+      '패치노트 시스템 데이터 구조화로 실시간 관리 용이성 확보',
+      '신규 업데이트 시 3일간 유지되는 NEW 배지 알림 시스템 도입',
+      '문서 다운로드 시 고정 파일명 "혁신 수익화 발굴 AI" 적용',
+      '사용자 경험(UX) 피드백 수렴을 위한 실시간 업데이트 창구 강화'
+    ]
+  },
+  {
+    version: '1.4.1',
+    title: '시스템 고도화 및 안정성 패치',
+    date: '2026.04.26',
+    type: 'Update',
+    items: [
+      '보안 코드 dc4 추가 및 인증 로직 확장',
+      'Gemini API 연결 안정성 및 모델 응답 속도 최적화',
+      'UI 애니메이션 성능 개선 및 고도화'
+    ]
+  },
+  {
+    version: '1.4.0',
+    title: '보안 및 실시간 콘텐츠 강화',
+    date: '2026.04.25',
+    type: 'Update',
+    items: [
+      '보안 인증 시스템 최신화 적용',
+      '사용방법 가이드 모달 추가',
+      '패치노트 시스템 도입 및 실시간 업데이트 연동',
+      'API 비용 계산기 로직 업데이트 및 적용 환율 명시',
+      '수익화 데이터베이스 실시간 동기화 및 최신 트렌드 반영'
+    ]
+  },
+  {
+    version: '1.3.0',
+    title: 'AI 로직 및 UI 개선',
+    date: '2026.04.25',
+    type: 'Update',
+    items: [
+      '수익화 분석 결과 생성 프롬프트 고도화 (강조 표기 방식 변경)',
+      '메인 히어로 섹션 텍스트 및 안내 문구 수정',
+      '생성 버튼 텍스트 변경 ("나만의 수익화 발굴 시작하기")',
+      '목표 수익 옵션 추가 및 수정 (1000만원 이상 추가)'
+    ]
+  }
+];
+
+const checkIsNewPatch = () => {
+  if (PATCH_NOTES.length === 0) return false;
+  const latestDateStr = PATCH_NOTES[0].date;
+  const [year, month, day] = latestDateStr.split('.').map(Number);
+  const latestDate = new Date(year, month - 1, day);
+  const today = new Date();
+  
+  // Set all times to midnight for accurate day comparison
+  const d1 = new Date(latestDate.getFullYear(), latestDate.getMonth(), latestDate.getDate());
+  const d2 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  
+  const diffTime = Math.abs(d2.getTime() - d1.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays <= 3;
+};
+
 export default function App() {
   const [currentStatus, setCurrentStatus] = useState(OPTIONS.currentStatus[0]);
   const [interest, setInterest] = useState(OPTIONS.interest[0]);
@@ -451,10 +518,16 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
               </button>
               <button 
                 onClick={() => setShowPatchModal(true)}
-                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 relative"
               >
                 <FileText className="w-3 h-3 text-blue-500" />
                 패치노트
+                {checkIsNewPatch() && (
+                  <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                )}
               </button>
               <button 
                 onClick={() => setShowAuthModal(true)}
@@ -1012,57 +1085,25 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 
               <div className="space-y-6 relative z-10 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
                 <div className="space-y-8">
-                  <div className="border-l-2 border-yellow-500 pl-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Update</span>
-                      <h4 className="font-bold text-white">Version 1.4.0 - 보안 및 실시간 콘텐츠 강화</h4>
-                      <span className="text-zinc-500 text-xs">2026.04.25</span>
+                  {PATCH_NOTES.map((note, index) => (
+                    <div key={index} className={`border-l-2 ${index === 0 ? 'border-yellow-500' : index === 1 ? 'border-blue-500' : index === 2 ? 'border-green-500' : 'border-zinc-500'} pl-4 space-y-3`}>
+                      <div className="flex items-center gap-2">
+                        <span className={`${index === 0 ? 'bg-yellow-500/10 text-yellow-500' : index === 1 ? 'bg-blue-500/10 text-blue-500' : index === 2 ? 'bg-green-500/10 text-green-500' : 'bg-zinc-500/10 text-zinc-500'} text-[10px] font-bold px-2 py-0.5 rounded-full uppercase`}>
+                          {note.type}
+                        </span>
+                        <h4 className="font-bold text-white">Version {note.version} - {note.title}</h4>
+                        <span className="text-zinc-500 text-xs">{note.date}</span>
+                        {index === 0 && checkIsNewPatch() && (
+                          <span className="bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-sm animate-pulse">NEW</span>
+                        )}
+                      </div>
+                      <ul className="text-sm text-zinc-400 space-y-2 list-disc list-inside">
+                        {note.items.map((item, i) => (
+                          <li key={i}>{item}</li>
+                        ))}
+                      </ul>
                     </div>
-                    <ul className="text-sm text-zinc-400 space-y-2 list-disc list-inside">
-                      <li>보안 인증 시스템 최신화 적용</li>
-                      <li>사용방법 가이드 모달 추가</li>
-                      <li>패치노트 시스템 도입 및 실시간 업데이트 연동</li>
-                      <li>API 비용 계산기 로직 업데이트 및 적용 환율 명시</li>
-                      <li>수익화 데이터베이스 실시간 동기화 및 최신 트렌드 반영</li>
-                    </ul>
-                  </div>
-
-                  <div className="border-l-2 border-blue-500 pl-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-blue-500/10 text-blue-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Update</span>
-                      <h4 className="font-bold text-white">Version 1.3.0 - AI 로직 및 UI 개선</h4>
-                      <span className="text-zinc-500 text-xs">2026.04.25</span>
-                    </div>
-                    <ul className="text-sm text-zinc-400 space-y-2 list-disc list-inside">
-                      <li>수익화 분석 결과 생성 프롬프트 고도화 (강조 표기 방식 변경)</li>
-                      <li>메인 히어로 섹션 텍스트 및 안내 문구 수정</li>
-                      <li>생성 버튼 텍스트 변경 ("나만의 수익화 발굴 시작하기")</li>
-                      <li>목표 수익 옵션 추가 및 수정 (1000만원 이상 추가)</li>
-                    </ul>
-                  </div>
-
-                  <div className="border-l-2 border-green-500 pl-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-green-500/10 text-green-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Feature</span>
-                      <h4 className="font-bold text-white">Version 1.2.0 - 데이터 세분화</h4>
-                      <span className="text-zinc-500 text-xs">2026.04.25</span>
-                    </div>
-                    <ul className="text-sm text-zinc-400 space-y-2 list-disc list-inside">
-                      <li>IT 숙련도, 위험 감수 성향 등 4개 추가 입력 필드 도입</li>
-                      <li>분석 데이터 반영 로직 정교화</li>
-                    </ul>
-                  </div>
-
-                  <div className="border-l-2 border-zinc-500 pl-4 space-y-3">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-zinc-500/10 text-zinc-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Initial</span>
-                      <h4 className="font-bold text-white">Version 1.0.0 - 정혁신 수익화 발굴 AI 런칭</h4>
-                      <span className="text-zinc-500 text-xs">2026.04.25</span>
-                    </div>
-                    <p className="text-sm text-zinc-400">
-                      개인 맞춤형 수익화 로드맵 설계 서비스 정식 런칭
-                    </p>
-                  </div>
+                  ))}
                 </div>
               </div>
 
