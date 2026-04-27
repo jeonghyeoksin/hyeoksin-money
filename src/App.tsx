@@ -605,7 +605,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-red-500">나만의 맞춤 수익화 발굴</span>
             </h2>
             <p className="text-zinc-300 text-base md:text-lg max-w-xl font-medium leading-relaxed">
-              당신의 숨겨진 잠재력을 찾아내어, 당장 오늘부터 시작할 수 있는 가장 현실적인 수익화 로드맵을 설계합니다.
+              여러분의 숨겨진 잠재력을 찾아내어, <br /> 현실적인 나만의 맞춤 수익화 발굴을 진행합니다.
             </p>
           </div>
         </motion.div>
