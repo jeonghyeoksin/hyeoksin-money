@@ -130,6 +130,11 @@ export default function App() {
   const [usage, setUsage] = useState({ promptTokens: 0, responseTokens: 0 });
   const [showCostModal, setShowCostModal] = useState(false);
 
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempKey, setTempKey] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showPatchModal, setShowPatchModal] = useState(false);
@@ -149,6 +154,20 @@ export default function App() {
     }
   };
 
+  const handleSaveKey = () => {
+    localStorage.setItem('gemini_api_key', tempKey);
+    setApiKey(tempKey);
+    setShowKeyModal(false);
+  };
+
+  const handleResetKey = () => {
+    localStorage.removeItem('gemini_api_key');
+    setApiKey('');
+    setTempKey('');
+    setShowKeyModal(false);
+    alert('API Key가 초기화되었습니다. 이제 기본 무료 모드로 작동합니다.');
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
@@ -162,10 +181,12 @@ export default function App() {
       return;
     }
 
-    const currentKey = process.env.GEMINI_API_KEY;
+    const currentKey = apiKey || process.env.GEMINI_API_KEY;
 
     if (!currentKey) {
-      setError('시스템 API Key가 설정되지 않았습니다. 관리자에게 문의하세요.');
+      setError('Google Gemini API Key를 설정해주세요.');
+      setTempKey(apiKey);
+      setShowKeyModal(true);
       return;
     }
 
@@ -413,6 +434,13 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
               >
                 <Calculator className="w-3 h-3" />
                 API 비용
+              </button>
+              <button 
+                onClick={() => { setTempKey(apiKey); setShowKeyModal(true); }}
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+              >
+                <Settings className="w-3 h-3 text-red-500" />
+                API 설정
               </button>
               <button 
                 onClick={() => setShowGuideModal(true)}
@@ -778,6 +806,79 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
           </div>
         </motion.div>
       </main>
+
+      {/* API Key Modal */}
+      <AnimatePresence>
+        {showKeyModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="bg-yellow-500/20 p-2 rounded-full">
+                    <Key className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">Google API Key 설정</h3>
+                </div>
+                <button onClick={() => setShowKeyModal(false)} className="text-zinc-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">Gemini API Key</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={tempKey}
+                      onChange={(e) => setTempKey(e.target.value)}
+                      placeholder="AI Studio API Key를 입력하세요"
+                      className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500 transition-all font-mono text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <X className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                    </button>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-2">
+                    입력하신 키는 브라우저 로컬 스토리지에만 안전하게 저장됩니다.
+                  </p>
+                </div>
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={handleResetKey}
+                    className="px-4 py-3 rounded-xl font-medium text-zinc-400 bg-zinc-800 hover:bg-zinc-700 hover:text-white transition-colors"
+                    title="저장된 키 삭제 및 무료 모드 전환"
+                  >
+                    초기화
+                  </button>
+                  <button
+                    onClick={() => setShowKeyModal(false)}
+                    className="px-4 py-3 rounded-xl font-medium text-zinc-300 bg-zinc-800 hover:bg-zinc-700 transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleSaveKey}
+                    className="flex-1 px-4 py-3 rounded-xl font-medium text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 transition-colors shadow-lg"
+                  >
+                    저장하기
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Buttons - Bottom Right */}
       <div className="fixed bottom-8 right-8 flex flex-col gap-3 z-40">
