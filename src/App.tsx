@@ -297,7 +297,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     }
 
     const contentToDownload = startIndex !== -1 ? lines.slice(startIndex).join('\n') : dataToUse;
-    const fileName = `혁신 수익화 발굴 AI_${currentStatus || '분석'}_${interest || '결과'}`;
+    const fileName = "혁신 수익화 발굴 AI";
 
     const blob = new Blob([contentToDownload], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
@@ -410,7 +410,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
       }],
     });
 
-    const fileName = `혁신 수익화 발굴 AI_${currentStatus || '분석'}_${interest || '결과'}`;
+    const fileName = "혁신 수익화 발굴 AI";
     const blob = await Packer.toBlob(doc);
     saveAs(blob, `${fileName}.docx`);
   };
