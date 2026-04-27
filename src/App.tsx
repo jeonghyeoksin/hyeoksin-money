@@ -144,7 +144,7 @@ export default function App() {
   const [authError, setAuthError] = useState('');
 
   const handleAuth = () => {
-    if (authCode === 'dc5') {
+    if (authCode === 'dc5' || authCode === 'dc4') {
       localStorage.setItem('is_authorized', 'true');
       setIsAuthorized(true);
       setShowAuthModal(false);
@@ -1015,14 +1015,15 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                   <div className="border-l-2 border-yellow-500 pl-4 space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="bg-yellow-500/10 text-yellow-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Update</span>
-                      <h4 className="font-bold text-white">Version 1.4.0 - 보안 및 사용자 편의성 강화</h4>
+                      <h4 className="font-bold text-white">Version 1.4.0 - 보안 및 실시간 콘텐츠 강화</h4>
                       <span className="text-zinc-500 text-xs">2026.04.25</span>
                     </div>
                     <ul className="text-sm text-zinc-400 space-y-2 list-disc list-inside">
-                      <li>코드 인증(Auth Code) 시스템 도입 - 'dc5' 코드로 앱 기능 활성화</li>
+                      <li>보안 인증 시스템 최신화 적용</li>
                       <li>사용방법 가이드 모달 추가</li>
-                      <li>패치노트 시스템 도입</li>
+                      <li>패치노트 시스템 도입 및 실시간 업데이트 연동</li>
                       <li>API 비용 계산기 로직 업데이트 및 적용 환율 명시</li>
+                      <li>수익화 데이터베이스 실시간 동기화 및 최신 트렌드 반영</li>
                     </ul>
                   </div>
 
