@@ -107,6 +107,17 @@ const OPTIONS = {
 
 const PATCH_NOTES = [
   {
+    version: '1.4.3',
+    title: 'API 연결 상태 시각화 강화',
+    date: '2026.04.29',
+    type: 'Update',
+    items: [
+      '상단 헤더에 실시간 API Key 적용 상태 표시기(Status Indicator) 추가',
+      'API Key 적용 여부에 따른 시각적 피드백(LED 효과 및 색상 코드) 강화',
+      '사용자 환경 설정 동기화 안정성 개선'
+    ]
+  },
+  {
     version: '1.4.2',
     title: '패치노트 자동화 및 시각적 가시성 개선',
     date: '2026.04.27',
@@ -495,6 +506,10 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold border ${apiKey ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-red-400 animate-pulse'}`}></div>
+                {apiKey ? 'API Key 적용됨' : 'API Key 미적용'}
+              </div>
               <button 
                 onClick={() => setShowCostModal(true)}
                 className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
