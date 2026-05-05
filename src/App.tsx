@@ -216,21 +216,6 @@ export default function App() {
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showPatchModal, setShowPatchModal] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(() => localStorage.getItem('is_authorized') === 'true');
-  const [authCode, setAuthCode] = useState('');
-  const [authError, setAuthError] = useState('');
-
-  const handleAuth = () => {
-    if (authCode === 'dc5' || authCode === 'dc4') {
-      localStorage.setItem('is_authorized', 'true');
-      setIsAuthorized(true);
-      setShowAuthModal(false);
-      setAuthError('');
-    } else {
-      setAuthError('인증 코드가 일치하지 않습니다.');
-    }
-  };
 
   const handleSaveKey = () => {
     localStorage.setItem('gemini_api_key', tempKey);
@@ -250,12 +235,6 @@ export default function App() {
     e.preventDefault();
     if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
       setError('모든 항목을 입력해주세요. 정확한 로드맵 설계를 위해 필요합니다.');
-      return;
-    }
-
-    if (!isAuthorized) {
-      setError('코드 인증이 필요합니다. 우측 상단 [코드 인증 필요] 버튼을 눌러주세요.');
-      setShowAuthModal(true);
       return;
     }
 
@@ -543,13 +522,6 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                   </span>
                 )}
-              </button>
-              <button 
-                onClick={() => setShowAuthModal(true)}
-                className={`text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 ${isAuthorized ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'}`}
-              >
-                <Key className="w-3 h-3" />
-                {isAuthorized ? '코드 인증 완료' : '코드 인증 필요'}
               </button>
             </div>
             <div className="text-sm font-medium text-zinc-400 border-l border-zinc-800 pl-4">
@@ -1225,66 +1197,6 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                   className="w-full py-4 rounded-2xl font-bold text-white bg-zinc-800 hover:bg-zinc-700 transition-all shadow-lg active:scale-[0.98]"
                 >
                   확인했습니다
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* Auth Code Modal */}
-      <AnimatePresence>
-        {showAuthModal && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden"
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-              
-              <div className="flex items-center justify-between mb-8 relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="bg-red-500/20 p-3 rounded-2xl">
-                    <Key className="w-6 h-6 text-red-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-extrabold text-white tracking-tight">코드 인증</h3>
-                    <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Authentication Required</p>
-                  </div>
-                </div>
-                <button 
-                  onClick={() => setShowAuthModal(false)} 
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white p-2 rounded-xl transition-all"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="space-y-6 relative z-10">
-                <div className="bg-zinc-950/50 border border-zinc-800 rounded-2xl p-6">
-                  <p className="text-zinc-300 text-sm mb-4 leading-relaxed font-medium">
-                    해당 앱의 기능을 사용하시려면 <span className="text-red-500 font-bold">인증 코드</span>를 입력해야 합니다.
-                  </p>
-                  <input
-                    type="text"
-                    value={authCode}
-                    onChange={(e) => setAuthCode(e.target.value)}
-                    placeholder="인증 코드를 입력하세요"
-                    className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all text-center font-bold tracking-widest text-lg"
-                    onKeyDown={(e) => e.key === 'Enter' && handleAuth()}
-                  />
-                  {authError && (
-                    <p className="text-red-500 text-xs mt-2 font-medium text-center">{authError}</p>
-                  )}
-                </div>
-                
-                <button
-                  onClick={handleAuth}
-                  className="w-full py-4 rounded-2xl font-bold text-white bg-red-600 hover:bg-red-500 transition-all shadow-lg active:scale-[0.98]"
-                >
-                  인증하기
                 </button>
               </div>
             </motion.div>
