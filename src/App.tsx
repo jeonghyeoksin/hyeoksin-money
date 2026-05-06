@@ -107,6 +107,17 @@ const OPTIONS = {
 
 const PATCH_NOTES = [
   {
+    version: '1.5.0',
+    title: '시스템 안정성 향상 및 사용성 개선',
+    date: '2026.05.06',
+    type: 'Update',
+    items: [
+      '코드 인증 시스템 전면 삭제 및 사용자 접근성 대폭 상향',
+      'AI 모델 트래픽 초과(503 High Demand) 시 자동 재시도 로직 도입',
+      'API 재요청 시 점진적 대기 시간(Exponential Backoff) 구현으로 서버 안정성 확보'
+    ]
+  },
+  {
     version: '1.4.3',
     title: 'API 연결 상태 시각화 강화',
     date: '2026.04.29',
@@ -296,12 +307,34 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 어조는 전문가답고, 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다.
 `;
 
-      const aiResponse = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: prompt,
-      });
+      let text = '';
+      let aiResponse: any;
+      let retries = 3;
+      let delay = 2000;
 
-      const text = aiResponse.text || '결과를 생성하지 못했습니다.';
+      while (retries > 0) {
+        try {
+          aiResponse = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt,
+          });
+          text = aiResponse.text || '결과를 생성하지 못했습니다.';
+          break; // 성공 시 루프 탈출
+        } catch (err: any) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          if (errMsg.includes('503') || errMsg.includes('UNAVAILABLE') || errMsg.includes('high demand')) {
+            retries--;
+            if (retries === 0) {
+              throw new Error('현재 AI 모델의 사용량이 매우 많아 일시적으로 접근이 어렵습니다. (503 High Demand) 잠시 후 다시 시도해주세요.');
+            }
+            console.warn(`API error (503), retrying in ${delay}ms... (${3 - retries}/3)`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 1.5; // 지수 백오프
+          } else {
+            throw err; // 다른 에러는 그대로 던짐
+          }
+        }
+      }
       setResult(text);
       
       // 구체적인 사용량 정보 추출 (SDK 버전에 따라 다를 수 있음)
