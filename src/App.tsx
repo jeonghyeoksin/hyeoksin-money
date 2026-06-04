@@ -107,6 +107,49 @@ const OPTIONS = {
 
 const PATCH_NOTES = [
   {
+    version: '1.5.4',
+    title: '다운로드 방식 수동화 및 UX 최적화',
+    date: '2026.06.04',
+    type: 'Update',
+    items: [
+      'AI 결과 생성 후 마크다운(.md) 파일이 실시간으로 자동 다운로드되던 동작을 비활성화',
+      '사용자가 "MD 다운로드" 버튼을 클릭했을 때만 오직 수동으로 다운로드되도록 다운로드 흐름 제어'
+    ]
+  },
+  {
+    version: '1.5.3',
+    title: 'Google Docs 최적화 복사 및 바로가기 신설',
+    date: '2026.06.04',
+    type: 'Update',
+    items: [
+      '결과물을 클립보드 복사 시 서식지정(Rich Text) 및 태그 없는 깔끔한 텍스트로 Docs 연동 최적화',
+      'Google Docs 바로가기 원클릭 링크 버튼 신설 및 독립적 UX 분리 제공',
+      '포맷 유지력이 강화되어 붙여넣기 시 색상 및 레이아웃 완벽 자동 세팅'
+    ]
+  },
+  {
+    version: '1.5.2',
+    title: 'Google Docs 연동 및 복사 기능 업그레이드',
+    date: '2026.06.04',
+    type: 'Update',
+    items: [
+      '기존 Word 다운로드 형식을 Google Docs 복사하기 버튼으로 개편',
+      '클릭 시 분석 결과 보고서 전문을 클립보드에 자동으로 복사하는 복사 자동화 기능 연동',
+      '복사 완료 후 곧바로 Google Docs 양식 작성 페이지로 안전하게 리다이렉트 및 안내 토스트 팝업 추가'
+    ]
+  },
+  {
+    version: '1.5.1',
+    title: 'AI 및 마케팅 비기너 마스터리 프롬프트 고도화',
+    date: '2026.06.04',
+    type: 'Update',
+    items: [
+      'AI/마케팅 초보자 및 입문자도 단번에 전체 원리를 장악할 수 있는 맞춤형 해설 프롬프트 전면 확대',
+      '전문 비즈니스/마케팅 용어(트래픽, 유입, 전환 등)를 비유를 통해 일상의 언어로 풀어주는 미니 용어 사전 기능 유도',
+      '수익화가 작동하는 기본 구조(가치 창출 - 모객 - 수익 실현)에 대한 쉽고 친절한 원리 교육 패치 반영'
+    ]
+  },
+  {
     version: '1.5.0',
     title: '시스템 안정성 향상 및 사용성 개선',
     date: '2026.05.06',
@@ -227,6 +270,45 @@ export default function App() {
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showPatchModal, setShowPatchModal] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
+
+  const handleCopyToDocs = async () => {
+    if (!result) return;
+    try {
+      const container = document.querySelector('.markdown-body');
+      if (container) {
+        const htmlContent = container.innerHTML;
+        const plainText = container.textContent || result;
+
+        // Create HTML and Plain text blobs
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const textBlob = new Blob([plainText], { type: 'text/plain' });
+
+        const clipboardItem = new ClipboardItem({
+          'text/html': htmlBlob,
+          'text/plain': textBlob
+        });
+
+        await navigator.clipboard.write([clipboardItem]);
+      } else {
+        // Fallback to plain text if container is missing
+        await navigator.clipboard.writeText(result.replace(/<[^>]*>/g, ''));
+      }
+      setShowCopyToast(true);
+      setTimeout(() => setShowCopyToast(false), 4000);
+    } catch (err) {
+      console.error('Failed to copy rich text to clipboard:', err);
+      try {
+        // Absolute basic plain text fallback without HTML tags
+        const cleanText = result.replace(/<[^>]*>/g, '');
+        await navigator.clipboard.writeText(cleanText);
+        setShowCopyToast(true);
+        setTimeout(() => setShowCopyToast(false), 4000);
+      } catch (fallbackErr) {
+        console.error('Final fallback copy failed:', fallbackErr);
+      }
+    }
+  };
 
   const handleSaveKey = () => {
     localStorage.setItem('gemini_api_key', tempKey);
@@ -267,7 +349,7 @@ export default function App() {
       const ai = new GoogleGenAI({ apiKey: currentKey });
       const prompt = `
 당신은 '정혁신'이 만든 '혁신 수익화 발굴 AI'입니다.
-AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행할 수 있도록 돕는 정혁신입니다.
+AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 하나만 읽고 완벽히 원리를 파악하여 바로 나만의 수익화를 설계하고 실행할 수 있도록 정성스럽게 돕는 교육자이자 마스터 가이드입니다.
 
 사용자 정보:
 - 현재 직업/상황: ${currentStatus}
@@ -286,7 +368,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 - 위험 감수 성향: ${riskTolerance}
 - 가장 즐거움을 느끼는 활동: ${joy}
 
-위 정보를 바탕으로 다음 내용을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
+위 정보를 바탕으로 아래에 나열된 모든 항목을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
 
 [출력 형식 및 스타일 가이드]
 - **중요: 마크다운 굵게 표시 기호인 '**'를 절대 사용하지 마세요.**
@@ -299,12 +381,19 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
 - [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
 - [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
 
+[보고서 필수 작성 대목]
+
+0. [초보자를 위한 가이드라인 도입부] 수익화 발굴의 3가지 대원칙 및 마케팅 상식 해설
+- AI와 마케팅을 처음하는 왕초보도 완벽하게 개념 수준부터 이해하고 납득할 수 있게 도와주세요.
+- 수익화가 탄생하는 핵심 메커니즘인 '가치 창출 (사람들이 원하는 무언가를 만드는 것)', '트래픽 확보 (사람들을 모으는 것)', '수익화 전환 (돈을 받고 가치를 전달하는 것)'을 오프라인의 '빵집 개업' 같은 아주 쉬운 일상 비유를 들어 쉽게 원리부터 설명해주세요.
+- 리포트에 사용되는 주요 마케팅 용어 사전(예: 트래픽=웹사이트나 SNS에 방문하는 사람들의 수/발길, 퍼스널 브랜딩=나라는 사람을 하나의 특별한 전문 상표로 만드는 과정, 유입=사람들이 내 글이나 서비스를 보러 들어오도록 유도하는 것, 수익화 전환=들어온 손님이 실제 결제까지 하도록 유도하는 것, 프롬프트=AI에게 내리는 구체적인 말 한마디이자 지시 명령어)을 먼저 이해하기 쉽고 친절하게 정리해 주고 보고서 본론으로 넘어가세요.
+
 1. 수익화 아이디어 브레인스토밍 (최소 3가지): 사용자의 상황에 최적화된, AI를 활용한 구체적인 수익화 아이디어
 2. 선택된 최적의 아이디어 1가지와 그 이유: 가장 현실적이고 효과적인 아이디어 선정 및 수익 창출 전략 상세 설명
 3. AI 왕초보자를 위한 맞춤형 가이드라인: 가이드라인만 따라 하면 누구든지 AI로 수익화를 할 수 있도록 매우 자세하고 디테일하며 쉽게 작성해주세요. 텍스트 생성 AI 툴로는 ChatGPT 대신 반드시 'Google Gemini'를 추천하고 활용법을 설명해야 합니다. Google Gemini에 어떻게 접속하고, 어떤 프롬프트를 입력해야 하는지 마우스 클릭 단위로 초등학생도 이해할 수 있게 설명해야 합니다.
 4. 단계별 실행 로드맵 (1주차 ~ 4주차 이상): 당장 오늘부터 시작할 수 있는 구체적인 Action Plan을 일차별/주차별로 아주 세밀하게 쪼개서 제공해주세요. **로드맵 초반에는 반드시 블로그 포스팅이 포함되어야 하며**, 블로그를 통해 초기 트래픽을 확보하고 퍼스널 브랜딩을 쌓는 과정을 필수로 포함하세요.
 
-어조는 전문가답고, 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다.
+어조는 전문가답고, 다정하게 교육적으로 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다. 이 보고서 자체만으로도 AI와 마케팅에 대한 든든한 온라인 입문 교과서 역할을 하도록 완성 가치를 끌어올려 주십시오.
 `;
 
       let text = '';
@@ -345,9 +434,8 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
         });
       }
 
-      // Automatically trigger downloads
-      isGenerating.current = true;
-      triggerAllDownloads(text);
+      // Automatically trigger downloads is disabled as requested by the user.
+      isGenerating.current = false;
     } catch (err) {
       console.error(err);
       let errorMessage = err instanceof Error ? err.message : String(err);
@@ -360,13 +448,6 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
     } finally {
       setLoading(false);
     }
-  };
-
-  const triggerAllDownloads = async (content: string) => {
-    // Small delay to ensure state update if needed, though we pass content directly
-    handleDownload(content);
-    await handleDownloadDocx(content);
-    isGenerating.current = false;
   };
 
   const handleDownload = (content?: string) => {
@@ -836,7 +917,7 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                   </div>
                   <h3 className="text-lg font-bold text-white">수익화 분석 결과</h3>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={() => handleDownload()}
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
@@ -845,12 +926,21 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
                     MD 다운로드
                   </button>
                   <button
-                    onClick={() => handleDownloadDocx()}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all shadow-lg text-sm font-medium"
+                    onClick={handleCopyToDocs}
+                    className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl transition-all border border-zinc-700 text-sm font-medium"
                   >
-                    <FileText className="w-4 h-4" />
-                    Word 다운로드
+                    <FileText className="w-4 h-4 text-yellow-500" />
+                    Docs 복사하기
                   </button>
+                  <a
+                    href="https://docs.google.com/document"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl transition-all shadow-lg text-sm font-medium animate-pulse hover:animate-none"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Docs 바로가기
+                  </a>
                 </div>
               </div>
             )}
@@ -1287,6 +1377,26 @@ AI 왕초보자도 AI를 활용하여 나만의 수익화를 발굴하고 실행
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* Copy Toast Notification */}
+      <AnimatePresence>
+        {showCopyToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%' }}
+            className="fixed bottom-24 left-1/2 z-[70] bg-zinc-900/95 backdrop-blur-md border border-zinc-800 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 w-[90%] max-w-sm"
+          >
+            <div className="bg-green-500/20 p-2 rounded-full flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white leading-tight">결과물이 복사되었습니다!</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5 leading-normal">구글 문서(Docs)에 간편하게 붙여넣어(Ctrl+V) 사용할 수 있습니다.</p>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
