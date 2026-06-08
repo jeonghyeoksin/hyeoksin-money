@@ -1,16 +1,49 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
 
+const CONFIG_FILE = path.join(process.cwd(), 'admin_config.json');
+
+const getAdminKey = () => {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const data = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf-8'));
+      return data.apiKey || '';
+    }
+  } catch (e) {}
+  return '';
+};
+
+const setAdminKey = (key: string) => {
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify({ apiKey: key }));
+};
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
+
+  // Admin Key Status
+  app.get("/api/admin/key", (req, res) => {
+    const key = getAdminKey();
+    res.json({ isSet: !!key || !!process.env.GEMINI_API_KEY });
+  });
+
+  // Set Admin Key
+  app.post("/api/admin/key", (req, res) => {
+    const { apiKey, adminId, password } = req.body;
+    if (adminId !== 'info@nextin.ai.kr' || password !== 'nextin1234!') {
+      return res.status(401).json({ error: '관리자 계정 정보가 일치하지 않습니다.' });
+    }
+    setAdminKey(apiKey || '');
+    res.json({ success: true });
+  });
 
   // API Endpoint for generation
   app.post("/api/generate", async (req, res) => {
@@ -21,7 +54,7 @@ async function startServer() {
         return res.status(400).json({ error: "Prompt is required." });
       }
 
-      const keyToUse = clientApiKey || process.env.GEMINI_API_KEY;
+      const keyToUse = clientApiKey || getAdminKey() || process.env.GEMINI_API_KEY;
       if (!keyToUse) {
         return res.status(400).json({ 
           error: "API Key가 설정되어 있지 않습니다. 개발자 설정 또는 직접 입력이 필요합니다." 

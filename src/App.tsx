@@ -584,6 +584,11 @@ export default function App() {
   const [showSamplesModal, setShowSamplesModal] = useState(false);
   const [showSampleToast, setShowSampleToast] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [adminId, setAdminId] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminTempKey, setAdminTempKey] = useState('');
+  const [adminStatus, setAdminStatus] = useState<string>('');
 
   const applySample = (settings: typeof MONETIZATION_SAMPLES[number]['settings']) => {
     setCurrentStatus(settings.currentStatus);
@@ -763,6 +768,31 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
     alert('API Key가 초기화되었습니다. 이제 기본 무료 모드로 작동합니다.');
   };
 
+  const handleSaveAdminKey = async () => {
+    try {
+      const response = await fetch('/api/admin/key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: adminTempKey, adminId, password: adminPassword })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAdminStatus('API Key가 앱 내부(서버)에 안전하게 저장되었습니다.');
+        setTimeout(() => {
+          setShowAdminModal(false);
+          setAdminStatus('');
+          setAdminId('');
+          setAdminPassword('');
+          setAdminTempKey('');
+        }, 1500);
+      } else {
+        setAdminStatus(data.error || '저장에 실패했습니다.');
+      }
+    } catch (err) {
+      setAdminStatus('네트워크 오류가 발생했습니다.');
+    }
+  };
+
   const handleDownload = (content?: string) => {
     const dataToUse = typeof content === 'string' ? content : result;
     if (!dataToUse) return;
@@ -912,10 +942,6 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold border ${apiKey ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-red-400 animate-pulse'}`}></div>
-                {apiKey ? 'API Key 적용됨' : 'API Key 미적용'}
-              </div>
               <button 
                 onClick={() => setShowSamplesModal(true)}
                 className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-yellow-500/20 shadow-md shadow-yellow-500/5 hover:border-yellow-500/40"
@@ -949,6 +975,13 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                   </span>
                 )}
+              </button>
+              <button 
+                onClick={() => setShowAdminModal(true)}
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-zinc-500/20 shadow-md hover:border-zinc-500/40"
+              >
+                <Settings className="w-3 h-3 text-zinc-400" />
+                관리자
               </button>
             </div>
           </div>
@@ -1311,6 +1344,87 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
           </div>
         </div>
       </footer>
+
+      {/* Admin Modal */}
+      <AnimatePresence>
+        {showAdminModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="bg-zinc-800 p-2 rounded-full">
+                    <Settings className="w-5 h-5 text-zinc-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white">관리자 설정</h3>
+                </div>
+                <button onClick={() => setShowAdminModal(false)} className="text-zinc-400 hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">관리자 아이디</label>
+                  <input
+                    type="text"
+                    value={adminId}
+                    onChange={(e) => setAdminId(e.target.value)}
+                    placeholder="아이디 입력"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">관리자 비밀번호</label>
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="비밀번호 입력"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-zinc-400 mb-2">서버 기본 API Key 설정</label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={adminTempKey}
+                    onChange={(e) => setAdminTempKey(e.target.value)}
+                    placeholder="모든 사용자에게 적용될 API Key"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-xs font-mono"
+                  />
+                  <p className="text-xs text-zinc-500 mt-2">이 키는 서버 환경(또는 admin_config.json)에 저장되어 전체 사용자에게 적용됩니다.</p>
+                </div>
+                
+                {adminStatus && (
+                  <div className={`p-3 rounded-lg text-xs ${adminStatus.includes('성공') || adminStatus.includes('안전하게') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    {adminStatus}
+                  </div>
+                )}
+                
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={() => setShowAdminModal(false)}
+                    className="flex-1 py-3 rounded-xl font-medium text-zinc-400 bg-zinc-800 hover:bg-zinc-700 hover:text-white transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleSaveAdminKey}
+                    className="flex-1 py-3 rounded-xl font-medium text-black bg-yellow-500 hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20"
+                  >
+                    서버에 저장
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* API Key Modal */}
       <AnimatePresence>
