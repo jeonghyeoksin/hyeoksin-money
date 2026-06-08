@@ -10,7 +10,7 @@ import Markdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import { saveAs } from 'file-saver';
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } from 'docx';
-import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, FileText, ExternalLink, HelpCircle, Mail, MessageSquare, Calculator, ChevronDown } from 'lucide-react';
+import { Sparkles, ArrowRight, Loader2, Target, Lightbulb, Rocket, TrendingUp, Coins, Settings, X, Key, Briefcase, Wallet, PenTool, Download, FileText, ExternalLink, HelpCircle, Mail, MessageSquare, Calculator, ChevronDown, BookOpen } from 'lucide-react';
 
 const SelectWithOther = ({ 
   label, 
@@ -104,6 +104,317 @@ const OPTIONS = {
   riskTolerance: ['안전 제일 (무자본/저위험 선호)', '중립 (필요시 적정 투자 가능)', '공격적 (빠른 성장을 위해 투자 선호)'],
   joy: ['조용히 무언가 만들기/창작', '사람들과 대화/소통하기', '무언가 분석하고 해결하기', '누군가를 돕고 가르치기', '새로운 곳에 가고 체험하기']
 };
+
+const MONETIZATION_SAMPLES = [
+  {
+    name: '🎯 직장인 주말 전자책 발굴 편',
+    description: '시간이 부족한 직장인을 위한 주말 한정 0원 무자본 지식 콘텐츠 창작 플랜',
+    tag: '무자본 / 주말 전용',
+    settings: {
+      currentStatus: '직장인',
+      interest: '글쓰기',
+      skills: '엑셀 활용',
+      workStyle: '혼자 집중하는 작업',
+      time: '주말만 가능',
+      capital: '0원 (무자본)',
+      targetIncome: '100만원',
+      personality: '꼼꼼함',
+      tools: '노트북/PC 보유',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '💅 주부 무자본 마케팅 대행 편',
+    description: '외출이 어려운 상황에서 스마트폰 한 대로 거실에서 실행하는 소셜 서비스 홍보 대행',
+    tag: '스마트폰 / 여성·주부 추천',
+    settings: {
+      currentStatus: '주부',
+      interest: '마케팅',
+      skills: 'SNS 마케팅',
+      workStyle: '비대면/온라인 작업',
+      time: '1~2시간',
+      capital: '0원 (무자본)',
+      targetIncome: '50만원',
+      personality: '창의적',
+      tools: '스마트폰만 가능',
+      constraints: '얼굴 노출 불가',
+      urgency: '여유롭게 준비 중',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '사람들과 대화/소통하기'
+    }
+  },
+  {
+    name: '🏬 자영업자 로컬 인플루언서 편',
+    description: '자신의 매장 홍보와 오프라인 커뮤니티 협업 능력을 극대화하여 퍼스널 브랜딩을 노리는 구조',
+    tag: '로컬 비즈니스 / 대면 협업',
+    settings: {
+      currentStatus: '자영업자',
+      interest: '디자인',
+      skills: '블로그 운영',
+      workStyle: '사람들과 소통하며 협업',
+      time: '3~4시간',
+      capital: '10~50만원',
+      targetIncome: '500만원',
+      personality: '외향적',
+      tools: '노트북/PC 보유',
+      constraints: '없음',
+      urgency: '6개월 내 목표',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '중립 (필요시 적정 투자 가능)',
+      joy: '누군가를 돕고 가르치기'
+    }
+  },
+  {
+    name: '💻 취준생 No-Code 서비스 빌더 편',
+    description: '직업을 탐색하며 고부가가치 AI 빌더 툴을 활용해 무자본 소형 비즈니스 앱을 출시해보는 플랜',
+    tag: '개발 특화 / 고수익 지향',
+    settings: {
+      currentStatus: '취준생',
+      interest: '프로그래밍',
+      skills: '코딩 기본',
+      workStyle: '비대면/온라인 작업',
+      time: '5시간 이상',
+      capital: '10만원 이하',
+      targetIncome: '200만원',
+      personality: '실행력이 빠름',
+      tools: '노트북/PC 보유',
+      constraints: '없음',
+      urgency: '매우 시급함 (수입 절실)',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '중립 (필요시 적정 투자 가능)',
+      joy: '무언가 분석하고 해결하기'
+    }
+  },
+  {
+    name: '🎓 대학생 노션 템플릿 & 교안 창작 편',
+    description: '대학 생활 중 정리한 학업 노하우나 템플릿을 가공하여 동기 및 후배들을 타겟으로 무자본 판매',
+    tag: '학생 맞춤 / 학업 연계',
+    settings: {
+      currentStatus: '학생',
+      interest: '글쓰기',
+      skills: '특별한 기술 없음',
+      workStyle: '혼자 집중하는 작업',
+      time: '1~2시간',
+      capital: '0원 (무자본)',
+      targetIncome: '30만원 이하',
+      personality: '창의적',
+      tools: '노트북/PC 보유',
+      constraints: '비대면 선호',
+      urgency: '여유롭게 준비 중',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '🗣️ 프리랜서 글로벌 비즈니스 영어 코칭 편',
+    description: '자신의 외국어 능력과 강의 코칭 기법을 살려 온라인 글로벌 직장인 시장을 타겟으로 비대면 레슨',
+    tag: '재능 마켓 / 고단가 계약',
+    settings: {
+      currentStatus: '프리랜서',
+      interest: '외국어',
+      skills: '강의/코칭',
+      workStyle: '비대면/온라인 작업',
+      time: '3~4시간',
+      capital: '0원 (무자본)',
+      targetIncome: '200만원',
+      personality: '외향적',
+      tools: '노트북/PC 보유',
+      constraints: '없음',
+      urgency: '3개월 내 목표',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '중립 (필요시 적정 투자 가능)',
+      joy: '누군가를 돕고 가르치기'
+    }
+  },
+  {
+    name: '🍳 퇴사자 요리 소모임 & 레시피 큐레이팅 편',
+    description: '퇴사 후의 일상을 자신의 조리 강점과 블로그에 묶어 지역 밀착형 소모임 및 온라인 큐레이션 진행',
+    tag: '푸드 라이프 / 팬덤 기반',
+    settings: {
+      currentStatus: '퇴사자',
+      interest: '요리',
+      skills: '블로그 운영',
+      workStyle: '사람들과 소통하며 협업',
+      time: '5시간 이상',
+      capital: '10~50만원',
+      targetIncome: '100만원',
+      personality: '인내심 강함',
+      tools: '노트북/PC 보유',
+      constraints: '없음',
+      urgency: '6개월 내 목표',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '중립 (필요시 적정 투자 가능)',
+      joy: '사람들과 대화/소통하기'
+    }
+  },
+  {
+    name: '🏋️ 직장인 미니 다이어트 코칭 챌린지 편',
+    description: '퇴근 후 자신의 헬스/다이어트 루틴을 공유하고, 일상 코칭 피드백을 주며 소액 유료 단톡방 운영',
+    tag: '헬스 케어 / 커뮤니티형',
+    settings: {
+      currentStatus: '직장인',
+      interest: '건강/피트니스',
+      skills: '강의/코칭',
+      workStyle: '비대면/온라인 작업',
+      time: '1~2시간',
+      capital: '0원 (무자본)',
+      targetIncome: '50만원',
+      personality: '실행력이 빠름',
+      tools: '스마트폰만 가능',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '누군가를 돕고 가르치기'
+    }
+  },
+  {
+    name: '🎨 취준생 맞춤형 브랜드 로고 디자인 팩 편',
+    description: '기본 디자인 감각과 디자인 툴을 살려 소상공인의 블로그 스킨, 채널 로고 아이덴티티를 원스톱 패키징',
+    tag: '디자인 아웃소싱 / 포트폴리오',
+    settings: {
+      currentStatus: '취준생',
+      interest: '디자인',
+      skills: '디자인 툴',
+      workStyle: '비대면/온라인 작업',
+      time: '3~4시간',
+      capital: '0원 (무자본)',
+      targetIncome: '100만원',
+      personality: '꼼꼼함',
+      tools: '노트북/PC 보유',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '✍️ 블로그 포스팅 원고 대행 편',
+    description: '소상공인이나 실무 기업의 블로그 글을 정기적으로 대신 작성하여 매월 지속적이고 높은 원고료 수입을 발굴하는 모델',
+    tag: '글쓰기 / 무자본 원고 대행',
+    settings: {
+      currentStatus: '프리랜서',
+      interest: '글쓰기',
+      skills: '블로그 운영',
+      workStyle: '혼자 집중하는 작업',
+      time: '3~4시간',
+      capital: '0원 (무자본)',
+      targetIncome: '100만원',
+      personality: '꼼꼼함',
+      tools: '노트북/PC 보유',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '🏢 개인 사업 블로그 브랜딩 컨설팅 편',
+    description: '단순한 글쓰기를 넘어 신뢰도 높은 스킨 제작, 타겟팅 세부 키워드 세팅 및 디자인으로 블로그 채널 전체를 완벽히 브랜딩',
+    tag: '브랜딩 / 고단가 종합 마케팅',
+    settings: {
+      currentStatus: '퇴사자',
+      interest: '마케팅',
+      skills: 'SNS 마케팅',
+      workStyle: '사람들과 소통하며 협업',
+      time: '5시간 이상',
+      capital: '0원 (무자본)',
+      targetIncome: '200만원',
+      personality: '창의적',
+      tools: '노트북/PC 보유',
+      constraints: '비대면 선호',
+      urgency: '3개월 내 목표',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '소규모 (지인/소통 위주)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '사람들과 대화/소통하기'
+    }
+  },
+  {
+    name: '🛍️ 소상공인 상세페이지 카피 대행 편',
+    description: '쿠팡 및 스마트스토어 신규 쇼핑몰 사장님을 위한 클릭을 유도하고 구매율을 끌어올리는 상세설명 문구 고도화 서비스',
+    tag: '커머스 기획 / 고유 타겟 카피',
+    settings: {
+      currentStatus: '취준생',
+      interest: '디자인',
+      skills: '디자인 툴',
+      workStyle: '비대면/온라인 작업',
+      time: '3~4시간',
+      capital: '0원 (무자본)',
+      targetIncome: '100만원',
+      personality: '분석적',
+      tools: '노트북/PC 보유',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '중급 (새로운 툴 금방 배움)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '📚 PDF 전자책 출판 & 정렬 대행 편',
+    description: '자신의 경험을 바탕으로 오랫동안 묵혀둔 노하우 문서가 있지만 다듬기와 플랫폼 승인, 판매 등록이 막막한 초보 저자를 돕는 대행 플랜',
+    tag: '지식 유통 / 정렬·유통 가이드',
+    settings: {
+      currentStatus: '직장인',
+      interest: '글쓰기',
+      skills: '블로그 운영',
+      workStyle: '혼자 집중하는 작업',
+      time: '1~2시간',
+      capital: '0원 (무자본)',
+      targetIncome: '50만원',
+      personality: '꼼꼼함',
+      tools: '노트북/PC 보유',
+      constraints: '얼굴 노출 불가',
+      urgency: '3개월 내 목표',
+      itSkill: '초보 (기본 툴 사용)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '안전 제일 (무자본/저위험 선호)',
+      joy: '조용히 무언가 만들기/창작'
+    }
+  },
+  {
+    name: '🌐 바이브코딩 기반 홈페이지 개발 대행 편',
+    description: '가장 직관적이고 강력한 "바이브코딩" 플랫폼을 적극 활용해 식당, 소상공인의 맞춤형 고성능 홈페이지를 완벽히 구축 및 대행하는 플랜',
+    tag: '바이브코딩 / 1인 개발 대행',
+    settings: {
+      currentStatus: '프리랜서',
+      interest: '프로그래밍',
+      skills: '코딩 기본',
+      workStyle: '비대면/온라인 작업',
+      time: '5시간 이상',
+      capital: '10만원 이하',
+      targetIncome: '500만원',
+      personality: '실행력이 빠름',
+      tools: '노트북/PC 보유',
+      constraints: '없음',
+      urgency: '3개월 내 목표',
+      itSkill: '고수 (IT/디지털 전문가)',
+      audience: '없음 (완전 0부터)',
+      riskTolerance: '중립 (필요시 적정 투자 가능)',
+      joy: '무언가 분석하고 해결하기'
+    }
+  }
+];
 
 const PATCH_NOTES = [
   {
@@ -270,7 +581,31 @@ export default function App() {
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [showPatchModal, setShowPatchModal] = useState(false);
+  const [showSamplesModal, setShowSamplesModal] = useState(false);
+  const [showSampleToast, setShowSampleToast] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
+
+  const applySample = (settings: typeof MONETIZATION_SAMPLES[number]['settings']) => {
+    setCurrentStatus(settings.currentStatus);
+    setInterest(settings.interest);
+    setSkills(settings.skills);
+    setWorkStyle(settings.workStyle);
+    setTime(settings.time);
+    setCapital(settings.capital);
+    setTargetIncome(settings.targetIncome);
+    setPersonality(settings.personality);
+    setTools(settings.tools);
+    setConstraints(settings.constraints);
+    setUrgency(settings.urgency);
+    setItSkill(settings.itSkill);
+    setAudience(settings.audience);
+    setRiskTolerance(settings.riskTolerance);
+    setJoy(settings.joy);
+
+    setShowSamplesModal(false);
+    setShowSampleToast(true);
+    setTimeout(() => setShowSampleToast(false), 4000);
+  };
 
   const handleCopyToDocs = async () => {
     if (!result) return;
@@ -604,6 +939,13 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
                 {apiKey ? 'API Key 적용됨' : 'API Key 미적용'}
               </div>
               <button 
+                onClick={() => setShowSamplesModal(true)}
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-yellow-500/20 shadow-md shadow-yellow-500/5 hover:border-yellow-500/40"
+              >
+                <BookOpen className="w-3 h-3 text-yellow-500" />
+                수익화 발굴 샘플
+              </button>
+              <button 
                 onClick={() => setShowCostModal(true)}
                 className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
               >
@@ -637,9 +979,6 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
                   </span>
                 )}
               </button>
-            </div>
-            <div className="text-sm font-medium text-zinc-400 border-l border-zinc-800 pl-4">
-              Developed by <span className="text-yellow-500">정혁신</span>
             </div>
           </div>
         </div>
@@ -990,6 +1329,18 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
         </motion.div>
       </main>
 
+      {/* Footer */}
+      <footer className="border-t border-zinc-900 bg-zinc-950/30 py-8 px-6 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-zinc-500 text-xs">
+          <div className="text-sm font-medium text-zinc-400">
+            Developed by <span className="text-yellow-500 font-semibold">정혁신</span>
+          </div>
+          <div>
+            &copy; {new Date().getFullYear()} 정혁신 AI 솔루션. All rights reserved.
+          </div>
+        </div>
+      </footer>
+
       {/* API Key Modal */}
       <AnimatePresence>
         {showKeyModal && (
@@ -1327,6 +1678,114 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
         )}
       </AnimatePresence>
 
+      {/* Various Monetization Samples Modal */}
+      <AnimatePresence>
+        {showSamplesModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md overflow-y-auto w-full">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 w-full max-w-4xl shadow-2xl relative my-8 overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              <div className="absolute top-0 right-0 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="flex items-center justify-between mb-6 relative z-10 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-500/20 p-3 rounded-2xl">
+                    <BookOpen className="w-6 h-6 text-yellow-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">수익화 발굴 샘플 선택</h3>
+                    <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">Premade Monetization Personas</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowSamplesModal(false)} 
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white p-2 rounded-xl transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar flex-1 relative z-10 text-left">
+                <p className="text-zinc-400 text-sm leading-relaxed font-normal">
+                  대표적인 4가지 무자본·소자본 창업 페르소나 샘플입니다. 마음에 드는 샘플을 선택하시면 아래 질문지 입력값이 해당 페르소나에 맞게 **즉시 자동으로 변경**됩니다.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {MONETIZATION_SAMPLES.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 hover:border-yellow-500/40 hover:bg-zinc-950 transition-all flex flex-col justify-between group space-y-4"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="text-lg font-bold text-white tracking-tight group-hover:text-yellow-500 transition-colors">
+                            {item.name}
+                          </h4>
+                          <span className="text-[10px] font-bold text-yellow-500 bg-yellow-500/10 px-2.5 py-1 rounded-full uppercase tracking-wider font-mono whitespace-nowrap">
+                            {item.tag}
+                          </span>
+                        </div>
+                        
+                        <p className="text-xs text-zinc-400 leading-relaxed">
+                          {item.description}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                          <div className="bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/50">
+                            <span className="text-zinc-500 block mb-0.5">현재 상태</span>
+                            <span className="text-zinc-200 font-semibold">{item.settings.currentStatus}</span>
+                          </div>
+                          <div className="bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/50">
+                            <span className="text-zinc-500 block mb-0.5">관심 분야</span>
+                            <span className="text-zinc-200 font-semibold">{item.settings.interest}</span>
+                          </div>
+                          <div className="bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/50">
+                            <span className="text-zinc-500 block mb-0.5">가용 시간</span>
+                            <span className="text-zinc-200 font-semibold">{item.settings.time}</span>
+                          </div>
+                          <div className="bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/50">
+                            <span className="text-zinc-500 block mb-0.5">목표 수익</span>
+                            <span className="text-emerald-400 font-semibold">{item.settings.targetIncome}</span>
+                          </div>
+                          <div className="bg-zinc-900/60 p-2 rounded-xl border border-zinc-800/50 col-span-2">
+                            <span className="text-zinc-500 block mb-0.5">보유 기기 및 특별 스킬</span>
+                            <span className="text-zinc-300">
+                              {item.settings.tools} / <strong className="text-zinc-200 font-medium">{item.settings.skills}</strong>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2">
+                        <button
+                          onClick={() => applySample(item.settings)}
+                          className="w-full py-2.5 rounded-xl font-bold text-xs text-zinc-950 bg-yellow-500 hover:bg-yellow-400 transition-all flex items-center justify-center gap-2 active:scale-[0.98] shadow-lg shadow-yellow-500/10"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          이 샘플 정보 자동 적용하기
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 pt-4 border-t border-zinc-800 flex-shrink-0 flex justify-end">
+                <button
+                  onClick={() => setShowSamplesModal(false)}
+                  className="px-6 py-3 rounded-xl font-bold text-white bg-zinc-800 hover:bg-zinc-700 transition-all shadow-md text-sm active:scale-[0.98]"
+                >
+                  닫기
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Support / Maintenance Modal */}
       <AnimatePresence>
         {showSupportModal && (
@@ -1395,6 +1854,26 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
             <div>
               <p className="text-sm font-bold text-white leading-tight">결과물이 복사되었습니다!</p>
               <p className="text-[11px] text-zinc-400 mt-0.5 leading-normal">구글 문서(Docs)에 간편하게 붙여넣어(Ctrl+V) 사용할 수 있습니다.</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sample Applied Toast Notification */}
+      <AnimatePresence>
+        {showSampleToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, scale: 0.9, x: '-50%' }}
+            className="fixed bottom-24 left-1/2 z-[70] bg-zinc-900/95 backdrop-blur-md border border-yellow-500/30 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 w-[90%] max-w-sm"
+          >
+            <div className="bg-yellow-500/20 p-2 rounded-full flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white leading-tight">샘플 정보가 질문지에 입력되었습니다!</p>
+              <p className="text-[11px] text-zinc-400 mt-0.5 leading-normal">질문지 전체가 선택하신 페르소나에 맞춰 세팅되었습니다.</p>
             </div>
           </motion.div>
         )}
