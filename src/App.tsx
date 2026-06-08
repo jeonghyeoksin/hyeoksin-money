@@ -584,11 +584,6 @@ export default function App() {
   const [showSamplesModal, setShowSamplesModal] = useState(false);
   const [showSampleToast, setShowSampleToast] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
-  const [showAdminModal, setShowAdminModal] = useState(false);
-  const [adminId, setAdminId] = useState('');
-  const [adminPassword, setAdminPassword] = useState('');
-  const [adminTempKey, setAdminTempKey] = useState('');
-  const [adminStatus, setAdminStatus] = useState<string>('');
 
   const applySample = (settings: typeof MONETIZATION_SAMPLES[number]['settings']) => {
     setCurrentStatus(settings.currentStatus);
@@ -610,110 +605,6 @@ export default function App() {
     setShowSamplesModal(false);
     setShowSampleToast(true);
     setTimeout(() => setShowSampleToast(false), 4000);
-  };
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
-      setError('모든 항목을 입력해주세요. 정확한 로드맵 설계를 위해 필요합니다.');
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-    setResult('');
-    isGenerating.current = true;
-
-    try {
-      const prompt = `
-당신은 '정혁신'이 만든 '혁신 수익화 발굴 AI'입니다.
-AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 하나만 읽고 완벽히 원리를 파악하여 바로 나만의 수익화를 설계하고 실행할 수 있도록 정성스럽게 돕는 교육자이자 마스터 가이드입니다.
-
-사용자 정보:
-- 현재 직업/상황: ${currentStatus}
-- 관심사/좋아하는 분야: ${interest}
-- 현재 보유 기술/경험: ${skills}
-- 선호하는 작업 방식: ${workStyle}
-- 하루 투자 가능 시간: ${time}
-- 초기 투자 가능 자본금: ${capital}
-- 목표 월 수익: ${targetIncome}
-- 성향/성격: ${personality}
-- 사용 가능 기기/도구: ${tools}
-- 추가 고려사항/제약: ${constraints}
-- 수익화 시급도: ${urgency}
-- IT/디지털 숙련도: ${itSkill}
-- 기존 SNS/영향력: ${audience}
-- 위험 감수 성향: ${riskTolerance}
-- 가장 즐거움을 느끼는 활동: ${joy}
-
-위 정보를 바탕으로 아래에 나열된 모든 항목을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
-
-[출력 형식 및 스타일 가이드]
-- **중요: 마크다운 굵게 표시 기호인 '**'를 절대 사용하지 마세요.**
-- 모든 강조는 HTML <span style="..."> 태그만을 사용하여 표시하세요.
-- 최대한 자세하고 방대한 분량으로 가독성 좋게 작성해주세요.
-- 강조할 텍스트는 <span style="color: #1d4ed8; font-weight: bold;">진한 파란색</span>으로 작성하세요.
-- 매우 중요한 텍스트는 <span style="color: #dc2626; font-weight: bold;">빨간색</span>으로 작성하세요.
-- 꼭 참조해야 할 사항은 <span style="background-color: #fef08a; font-weight: bold; color: #1f2937;">노란색 배경</span>으로 작성하세요.
-- 마크다운 문법(헤더, 리스트 등)과 HTML 태그(span)를 적절히 혼용하여 시각적으로 훌륭한 문서를 만들어주세요.
-- [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
-- [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
-
-[보고서 필수 작성 대목]
-
-0. [초보자를 위한 가이드라인 도입부] 수익화 발굴의 3가지 대원칙 및 마케팅 상식 해설
-- AI와 마케팅을 처음하는 왕초보도 완벽하게 개념 수준부터 이해하고 납득할 수 있게 도와주세요.
-- 수익화가 탄생하는 핵심 메커니즘인 '가치 창출 (사람들이 원하는 무언가를 만드는 것)', '트래픽 확보 (사람들을 모으는 것)', '수익화 전환 (돈을 받고 가치를 전달하는 것)'을 오프라인의 '빵집 개업' 같은 아주 쉬운 일상 비유를 들어 쉽게 원리부터 설명해주세요.
-- 리포트에 사용되는 주요 마케팅 용어 사전(예: 트래픽=웹사이트나 SNS에 방문하는 사람들의 수/발길, 퍼스널 브랜딩=나라는 사람을 하나의 특별한 전문 상표로 만드는 과정, 유입=사람들이 내 글이나 서비스를 보러 들어오도록 유도하는 것, 수익화 전환=들어온 손님이 실제 결제까지 하도록 유도하는 것, 프롬프트=AI에게 내리는 구체적인 말 한마디이자 지시 명령어)을 먼저 이해하기 쉽고 친절하게 정리해 주고 보고서 본론으로 넘어가세요.
-
-1. 수익화 아이디어 브레인스토밍 (최소 3가지): 사용자의 상황에 최적화된, AI를 활용한 구체적인 수익화 아이디어
-2. 선택된 최적의 아이디어 1가지와 그 이유: 가장 현실적이고 효과적인 아이디어 선정 및 수익 창출 전략 상세 설명
-3. AI 왕초보자를 위한 맞춤형 가이드라인: 가이드라인만 따라 하면 누구든지 AI로 수익화를 할 수 있도록 매우 자세하고 디테일하며 쉽게 작성해주세요. 텍스트 생성 AI 툴로는 ChatGPT 대신 반드시 'Google Gemini'를 추천하고 활용법을 설명해야 합니다. Google Gemini에 어떻게 접속하고, 어떤 프롬프트를 입력해야 하는지 마우스 클릭 단위로 초등학생도 이해할 수 있게 설명해야 합니다.
-4. 단계별 실행 로드맵 (1주차 ~ 4주차 이상): 당장 오늘부터 시작할 수 있는 구체적인 Action Plan을 일차별/주차별로 아주 세밀하게 쪼개서 제공해주세요. **로드맵 초반에는 반드시 블로그 포스팅이 포함되어야 하며**, 블로그를 통해 초기 트래픽을 확보하고 퍼스널 브랜딩을 쌓는 과정을 필수로 포함하세요.
-
-어조는 전문가답고, 다정하게 교육적으로 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다. 이 보고서 자체만으로도 AI와 마케팅에 대한 든든한 온라인 입문 교과서 역할을 하도록 완성 가치를 끌어올려 주십시오.
-`;
-
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt,
-          clientApiKey: apiKey,
-          model: 'gemini-3-flash-preview',
-        }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || 'AI 결과를 가져오는 중 오류가 발생했습니다.');
-      }
-
-      const resData = await response.json();
-      setResult(resData.text || '결과를 생성하지 못했습니다.');
-      
-      if (resData.usageMetadata) {
-        setUsage({
-          promptTokens: resData.usageMetadata.promptTokenCount || 0,
-          responseTokens: resData.usageMetadata.candidatesTokenCount || 0
-        });
-      }
-
-      isGenerating.current = false;
-    } catch (err) {
-      console.error(err);
-      let errorMessage = err instanceof Error ? err.message : String(err);
-      
-      if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
-        errorMessage = 'Gemini API 무료 할당량을 모두 사용했거나 결제 잔액이 부족합니다. \n잠시 후(약 1분 뒤) 다시 시도해보세요.';
-      }
-
-      setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleCopyToDocs = async () => {
@@ -768,28 +659,129 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
     alert('API Key가 초기화되었습니다. 이제 기본 무료 모드로 작동합니다.');
   };
 
-  const handleSaveAdminKey = async () => {
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
+      setError('모든 항목을 입력해주세요. 정확한 로드맵 설계를 위해 필요합니다.');
+      return;
+    }
+
+    const currentKey = apiKey || process.env.GEMINI_API_KEY;
+
+    if (!currentKey) {
+      setError('Google Gemini API Key를 설정해주세요.');
+      setTempKey(apiKey);
+      setShowKeyModal(true);
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+    setResult('');
+    isGenerating.current = true;
+
     try {
-      const response = await fetch('/api/admin/key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: adminTempKey, adminId, password: adminPassword })
-      });
-      const data = await response.json();
-      if (data.success) {
-        setAdminStatus('API Key가 앱 내부(서버)에 안전하게 저장되었습니다.');
-        setTimeout(() => {
-          setShowAdminModal(false);
-          setAdminStatus('');
-          setAdminId('');
-          setAdminPassword('');
-          setAdminTempKey('');
-        }, 1500);
-      } else {
-        setAdminStatus(data.error || '저장에 실패했습니다.');
+      const ai = new GoogleGenAI({ apiKey: currentKey });
+      const prompt = `
+당신은 '정혁신'이 만든 '혁신 수익화 발굴 AI'입니다.
+AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 하나만 읽고 완벽히 원리를 파악하여 바로 나만의 수익화를 설계하고 실행할 수 있도록 정성스럽게 돕는 교육자이자 마스터 가이드입니다.
+
+사용자 정보:
+- 현재 직업/상황: ${currentStatus}
+- 관심사/좋아하는 분야: ${interest}
+- 현재 보유 기술/경험: ${skills}
+- 선호하는 작업 방식: ${workStyle}
+- 하루 투자 가능 시간: ${time}
+- 초기 투자 가능 자본금: ${capital}
+- 목표 월 수익: ${targetIncome}
+- 성향/성격: ${personality}
+- 사용 가능 기기/도구: ${tools}
+- 추가 고려사항/제약: ${constraints}
+- 수익화 시급도: ${urgency}
+- IT/디지털 숙련도: ${itSkill}
+- 기존 SNS/영향력: ${audience}
+- 위험 감수 성향: ${riskTolerance}
+- 가장 즐거움을 느끼는 활동: ${joy}
+
+위 정보를 바탕으로 아래에 나열된 모든 항목을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
+
+[출력 형식 및 스타일 가이드]
+- **중요: 마크다운 굵게 표시 기호인 '**'를 절대 사용하지 마세요.**
+- 모든 강조는 HTML <span style="..."> 태그만을 사용하여 표시하세요.
+- 최대한 자세하고 방대한 분량으로 가독성 좋게 작성해주세요.
+- 강조할 텍스트는 <span style="color: #1d4ed8; font-weight: bold;">진한 파란색</span>으로 작성하세요.
+- 매우 중요한 텍스트는 <span style="color: #dc2626; font-weight: bold;">빨간색</span>으로 작성하세요.
+- 꼭 참조해야 할 사항은 <span style="background-color: #fef08a; font-weight: bold; color: #1f2937;">노란색 배경</span>으로 작성하세요.
+- 마크다운 문법(헤더, 리스트 등)과 HTML 태그(span)를 적절히 혼용하여 시각적으로 훌륭한 문서를 만들어주세요.
+- [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
+- [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
+
+[보고서 필수 작성 대목]
+
+0. [초보자를 위한 가이드라인 도입부] 수익화 발굴의 3가지 대원칙 및 마케팅 상식 해설
+- AI와 마케팅을 처음하는 왕초보도 완벽하게 개념 수준부터 이해하고 납득할 수 있게 도와주세요.
+- 수익화가 탄생하는 핵심 메커니즘인 '가치 창출 (사람들이 원하는 무언가를 만드는 것)', '트래픽 확보 (사람들을 모으는 것)', '수익화 전환 (돈을 받고 가치를 전달하는 것)'을 오프라인의 '빵집 개업' 같은 아주 쉬운 일상 비유를 들어 쉽게 원리부터 설명해주세요.
+- 리포트에 사용되는 주요 마케팅 용어 사전(예: 트래픽=웹사이트나 SNS에 방문하는 사람들의 수/발길, 퍼스널 브랜딩=나라는 사람을 하나의 특별한 전문 상표로 만드는 과정, 유입=사람들이 내 글이나 서비스를 보러 들어오도록 유도하는 것, 수익화 전환=들어온 손님이 실제 결제까지 하도록 유도하는 것, 프롬프트=AI에게 내리는 구체적인 말 한마디이자 지시 명령어)을 먼저 이해하기 쉽고 친절하게 정리해 주고 보고서 본론으로 넘어가세요.
+
+1. 수익화 아이디어 브레인스토밍 (최소 3가지): 사용자의 상황에 최적화된, AI를 활용한 구체적인 수익화 아이디어
+2. 선택된 최적의 아이디어 1가지와 그 이유: 가장 현실적이고 효과적인 아이디어 선정 및 수익 창출 전략 상세 설명
+3. AI 왕초보자를 위한 맞춤형 가이드라인: 가이드라인만 따라 하면 누구든지 AI로 수익화를 할 수 있도록 매우 자세하고 디테일하며 쉽게 작성해주세요. 텍스트 생성 AI 툴로는 ChatGPT 대신 반드시 'Google Gemini'를 추천하고 활용법을 설명해야 합니다. Google Gemini에 어떻게 접속하고, 어떤 프롬프트를 입력해야 하는지 마우스 클릭 단위로 초등학생도 이해할 수 있게 설명해야 합니다.
+4. 단계별 실행 로드맵 (1주차 ~ 4주차 이상): 당장 오늘부터 시작할 수 있는 구체적인 Action Plan을 일차별/주차별로 아주 세밀하게 쪼개서 제공해주세요. **로드맵 초반에는 반드시 블로그 포스팅이 포함되어야 하며**, 블로그를 통해 초기 트래픽을 확보하고 퍼스널 브랜딩을 쌓는 과정을 필수로 포함하세요.
+
+어조는 전문가답고, 다정하게 교육적으로 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다. 이 보고서 자체만으로도 AI와 마케팅에 대한 든든한 온라인 입문 교과서 역할을 하도록 완성 가치를 끌어올려 주십시오.
+`;
+
+      let text = '';
+      let aiResponse: any;
+      let retries = 3;
+      let delay = 2000;
+
+      while (retries > 0) {
+        try {
+          aiResponse = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt,
+          });
+          text = aiResponse.text || '결과를 생성하지 못했습니다.';
+          break; // 성공 시 루프 탈출
+        } catch (err: any) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          if (errMsg.includes('503') || errMsg.includes('UNAVAILABLE') || errMsg.includes('high demand')) {
+            retries--;
+            if (retries === 0) {
+              throw new Error('현재 AI 모델의 사용량이 매우 많아 일시적으로 접근이 어렵습니다. (503 High Demand) 잠시 후 다시 시도해주세요.');
+            }
+            console.warn(`API error (503), retrying in ${delay}ms... (${3 - retries}/3)`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 1.5; // 지수 백오프
+          } else {
+            throw err; // 다른 에러는 그대로 던짐
+          }
+        }
       }
+      setResult(text);
+      
+      // 구체적인 사용량 정보 추출 (SDK 버전에 따라 다를 수 있음)
+      if (aiResponse.usageMetadata) {
+        setUsage({
+          promptTokens: aiResponse.usageMetadata.promptTokenCount || 0,
+          responseTokens: aiResponse.usageMetadata.candidatesTokenCount || 0
+        });
+      }
+
+      // Automatically trigger downloads is disabled as requested by the user.
+      isGenerating.current = false;
     } catch (err) {
-      setAdminStatus('네트워크 오류가 발생했습니다.');
+      console.error(err);
+      let errorMessage = err instanceof Error ? err.message : String(err);
+      
+      if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
+        errorMessage = 'Gemini API 무료 할당량을 모두 사용했거나 결제 잔액이 부족합니다. \n잠시 후(약 1분 뒤) 다시 시도해보세요.';
+      }
+
+      setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -942,6 +934,10 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
           </div>
           <div className="flex items-center gap-4">
             <div className="hidden sm:flex items-center gap-2">
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-bold border ${apiKey ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${apiKey ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-red-400 animate-pulse'}`}></div>
+                {apiKey ? 'API Key 적용됨' : 'API Key 미적용'}
+              </div>
               <button 
                 onClick={() => setShowSamplesModal(true)}
                 className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-yellow-500/20 shadow-md shadow-yellow-500/5 hover:border-yellow-500/40"
@@ -955,6 +951,13 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
               >
                 <Calculator className="w-3 h-3" />
                 API 비용
+              </button>
+              <button 
+                onClick={() => { setTempKey(apiKey); setShowKeyModal(true); }}
+                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
+              >
+                <Settings className="w-3 h-3 text-red-500" />
+                API 설정
               </button>
               <button 
                 onClick={() => setShowGuideModal(true)}
@@ -975,13 +978,6 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                   </span>
                 )}
-              </button>
-              <button 
-                onClick={() => setShowAdminModal(true)}
-                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-zinc-500/20 shadow-md hover:border-zinc-500/40"
-              >
-                <Settings className="w-3 h-3 text-zinc-400" />
-                관리자
               </button>
             </div>
           </div>
@@ -1345,87 +1341,6 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
         </div>
       </footer>
 
-      {/* Admin Modal */}
-      <AnimatePresence>
-        {showAdminModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="bg-zinc-800 p-2 rounded-full">
-                    <Settings className="w-5 h-5 text-zinc-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white">관리자 설정</h3>
-                </div>
-                <button onClick={() => setShowAdminModal(false)} className="text-zinc-400 hover:text-white transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">관리자 아이디</label>
-                  <input
-                    type="text"
-                    value={adminId}
-                    onChange={(e) => setAdminId(e.target.value)}
-                    placeholder="아이디 입력"
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">관리자 비밀번호</label>
-                  <input
-                    type="password"
-                    value={adminPassword}
-                    onChange={(e) => setAdminPassword(e.target.value)}
-                    placeholder="비밀번호 입력"
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-zinc-400 mb-2">서버 기본 API Key 설정</label>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={adminTempKey}
-                    onChange={(e) => setAdminTempKey(e.target.value)}
-                    placeholder="모든 사용자에게 적용될 API Key"
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 text-xs font-mono"
-                  />
-                  <p className="text-xs text-zinc-500 mt-2">이 키는 서버 환경(또는 admin_config.json)에 저장되어 전체 사용자에게 적용됩니다.</p>
-                </div>
-                
-                {adminStatus && (
-                  <div className={`p-3 rounded-lg text-xs ${adminStatus.includes('성공') || adminStatus.includes('안전하게') ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                    {adminStatus}
-                  </div>
-                )}
-                
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={() => setShowAdminModal(false)}
-                    className="flex-1 py-3 rounded-xl font-medium text-zinc-400 bg-zinc-800 hover:bg-zinc-700 hover:text-white transition-colors"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleSaveAdminKey}
-                    className="flex-1 py-3 rounded-xl font-medium text-black bg-yellow-500 hover:bg-yellow-400 transition-colors shadow-lg shadow-yellow-500/20"
-                  >
-                    서버에 저장
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       {/* API Key Modal */}
       <AnimatePresence>
         {showKeyModal && (
@@ -1531,65 +1446,225 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
       {/* API Cost Modal */}
       <AnimatePresence>
         {showCostModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md overflow-y-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-md shadow-2xl relative"
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 sm:p-8 w-full max-w-3xl shadow-2xl relative my-8 overflow-hidden max-h-[90vh] flex flex-col"
             >
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="bg-yellow-500/20 p-2 rounded-full">
-                    <Calculator className="w-5 h-5 text-yellow-500" />
+              {/* Blur Decorative Element */}
+              <div className="absolute top-0 right-0 w-80 h-80 bg-red-600/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-yellow-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6 relative z-10 flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="bg-yellow-500/20 p-3 rounded-2xl">
+                    <Calculator className="w-6 h-6 text-yellow-500" />
                   </div>
-                  <h3 className="text-lg font-bold text-white">API 비용 계산기</h3>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">혁신 AI 비용 계산기</h3>
+                    <p className="text-zinc-500 text-xs font-medium uppercase tracking-wider">API Cost & Token Usage Analysis</p>
+                  </div>
                 </div>
-                <button onClick={() => setShowCostModal(false)} className="text-zinc-400 hover:text-white transition-colors">
+                <button 
+                  onClick={() => setShowCostModal(false)} 
+                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white p-2 rounded-xl transition-all cursor-pointer"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-6">
-                <div className="bg-zinc-950/50 border border-zinc-800 rounded-xl p-4 space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">마지막 호출 입력 토큰</span>
-                    <span className="text-white font-medium">{usage.promptTokens.toLocaleString()} tokens</span>
+              {/* Scrollable Content */}
+              <div className="space-y-6 overflow-y-auto pr-2 custom-scrollbar flex-1 relative z-10 text-left">
+                
+                {/* 1. Current usage Section / Placeholder */}
+                <div className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-5 sm:p-6 space-y-4">
+                  <h4 className="text-base font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    실시간 지출 현황 (현재 세션)
+                  </h4>
+                  
+                  {usage.promptTokens > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between">
+                        <span className="text-zinc-500 text-xs font-semibold">입력 토큰 (내역/맥락)</span>
+                        <div className="mt-2 flex items-baseline gap-1">
+                          <span className="text-xl font-bold text-zinc-100">{usage.promptTokens.toLocaleString()}</span>
+                          <span className="text-[10px] text-zinc-400">tokens</span>
+                        </div>
+                      </div>
+                      <div className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl flex flex-col justify-between">
+                        <span className="text-zinc-500 text-xs font-semibold">출력 토큰 (AI 리포트)</span>
+                        <div className="mt-2 flex items-baseline gap-1">
+                          <span className="text-xl font-bold text-zinc-100">{usage.responseTokens.toLocaleString()}</span>
+                          <span className="text-[10px] text-zinc-400">tokens</span>
+                        </div>
+                      </div>
+                      <div className="bg-zinc-900/80 border border-yellow-500/20 p-4 rounded-xl flex flex-col justify-between bg-gradient-to-br from-zinc-900 to-yellow-500/5">
+                        <span className="text-yellow-500 text-xs font-bold flex items-center gap-1">
+                          예상 소요 비용 (KRW)
+                        </span>
+                        <div className="mt-2 flex items-baseline gap-1">
+                          <span className="text-2xl font-black text-yellow-500">
+                            {Math.ceil((usage.promptTokens * 0.0000035 + usage.responseTokens * 0.0000105) * 1400).toLocaleString()}
+                          </span>
+                          <span className="text-xs font-bold text-yellow-500">원</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-4 text-center space-y-2">
+                      <p className="text-sm font-semibold text-zinc-300">현재 세션에서 발굴된 AI 결과가 존재하지 않습니다.</p>
+                      <p className="text-xs text-zinc-500 max-w-lg mx-auto leading-relaxed">
+                        질문지를 수집하여 <strong className="text-zinc-400 font-medium">"나만의 수익화 발굴 시작하기"</strong>를 실행하면, 이곳에 실시간 소비된 토큰 및 비용이 산출되어 기록됩니다.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Min / Max / Avg Scenarios Section */}
+                <div className="space-y-4">
+                  <h4 className="text-base font-bold text-white flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-red-500" />
+                    혁신 수익화 발굴 AI 소모 비용 예측 시나리오
+                  </h4>
+                  
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    본 AI 서비스를 이용할 때 소요되는 토큰과 비용을 최소, 평균, 최대 시나리오로 상세히 비교 설명합니다. 최상의 비용 효율을 자랑하는 실속형(Flash) 모델과 고급형(Pro) 모델의 소요 비용을 미리 확인해보세요.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Minimum Scenario */}
+                    <div className="bg-zinc-950/40 border border-zinc-800 rounded-2xl p-4 sm:p-5 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 bg-blue-500/10 text-blue-400 text-[9px] font-black px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-mono">
+                        MINIMUM
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">최소 비용</span>
+                        </div>
+                        <h5 className="text-sm font-extrabold text-white">속성 로드맵 및 축약 리포트</h5>
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          선택 정보가 단문이며 AI가 일차별 가이드를 축약하여 핵심 위주로 답변을 간단히 내놓았을 때의 최소 소요 비용입니다.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2.5 pt-2 border-t border-zinc-900">
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                          <span>가상 토큰 량</span>
+                          <span className="text-zinc-300 font-mono text-[11px]">입력 1k / 출력 1.5k</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl">
+                          <span className="text-[11px] text-zinc-400">실속형 (Flash)</span>
+                          <span className="text-xs font-bold text-emerald-400">약 0.7원</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl">
+                          <span className="text-[11px] text-zinc-400">고급형 (Pro)</span>
+                          <span className="text-xs font-bold text-yellow-500">약 27원</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Average Scenario */}
+                    <div className="bg-zinc-950/40 border border-yellow-500/20 rounded-2xl p-4 sm:p-5 hover:border-yellow-500/30 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden bg-gradient-to-b from-yellow-500/3 to-zinc-950/40">
+                      <div className="absolute top-0 right-0 bg-yellow-500/10 text-yellow-400 text-[9px] font-black px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-mono">
+                        AVERAGE
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded-full">평균 비용</span>
+                        </div>
+                        <h5 className="text-sm font-extrabold text-white">표준 핵심 수익화 설계</h5>
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          15가지 질문지의 성향에 완벽히 정형 매치하며, 3단 아이디어 제안과 체계화된 4주짜리 일차별 실행 계획을 평균적으로 수령하는 표준 권장 비용입니다.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2.5 pt-2 border-t border-zinc-900">
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                          <span>가상 토큰 량</span>
+                          <span className="text-zinc-300 font-mono text-[11px]">입력 1.8k / 출력 3.5k</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl">
+                          <span className="text-[11px] text-zinc-400">실속형 (Flash)</span>
+                          <span className="text-xs font-bold text-emerald-400">약 1.7원</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl border border-yellow-500/10 bg-yellow-500/2">
+                          <span className="text-[11px] text-zinc-400">고급형 (Pro)</span>
+                          <span className="text-xs font-bold text-yellow-500">약 60원</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Maximum Scenario */}
+                    <div className="bg-zinc-950/40 border border-zinc-800 rounded-2xl p-4 sm:p-5 hover:border-zinc-700 transition-all flex flex-col justify-between space-y-4 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 bg-red-500/10 text-red-500 text-[9px] font-black px-2.5 py-1 rounded-bl-xl uppercase tracking-wider font-mono">
+                        MAXIMUM
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full">최대 비용</span>
+                        </div>
+                        <h5 className="text-sm font-extrabold text-white">초정밀 확장 실행 플랜</h5>
+                        <p className="text-[11px] text-zinc-400 leading-relaxed">
+                          '기타(직접 작성)'를 다수 이용해 상세 질문들을 엄청나게 풍부하게 채우고, AI가 마크다운 최대 버퍼 한도까지 한글을 가득 눌러담아 출력할 때 소모되는 최대 수준 가격입니다.
+                        </p>
+                      </div>
+
+                      <div className="space-y-2.5 pt-2 border-t border-zinc-900">
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                          <span>가상 토큰 량</span>
+                          <span className="text-zinc-300 font-mono text-[11px]">입력 2.5k / 출력 6k</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl">
+                          <span className="text-[11px] text-zinc-400">실속형 (Flash)</span>
+                          <span className="text-xs font-bold text-emerald-400">약 2.8원</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-zinc-900/60 px-3 py-2 rounded-xl">
+                          <span className="text-[11px] text-zinc-400">고급형 (Pro)</span>
+                          <span className="text-xs font-bold text-yellow-500">약 100원</span>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-zinc-400">마지막 호출 출력 토큰</span>
-                    <span className="text-white font-medium">{usage.responseTokens.toLocaleString()} tokens</span>
+                </div>
+
+                {/* Promotional Value / Note */}
+                <div className="bg-zinc-800/30 border border-zinc-800 rounded-2xl p-4 sm:p-5 flex items-start gap-4">
+                  <div className="bg-yellow-500/10 p-2.5 rounded-xl flex-shrink-0">
+                    <TrendingUp className="w-5 h-5 text-yellow-500" />
                   </div>
-                  <div className="pt-3 border-t border-zinc-800 flex justify-between items-center text-lg">
-                    <span className="text-zinc-200 font-bold">예상 비용 (KRW)</span>
-                    <span className="text-yellow-500 font-extrabold flex items-center gap-1">
-                      {Math.ceil((usage.promptTokens * 0.0000035 + usage.responseTokens * 0.0000105) * 1400).toLocaleString()}원
-                    </span>
-                  </div>
-                  <div className="space-y-1 text-right">
-                    <p className="text-[10px] text-zinc-500 italic">
-                      * Gemini 1.5 Pro 모델 기준 (1M 토큰당 Input $3.5 / Output $10.5)
-                    </p>
-                    <p className="text-[10px] text-zinc-500 italic">
-                      * 적용 환율: 1,400원 (실제 청구 금액은 환율 및 모델에 따라 상이할 수 있음)
+                  <div className="space-y-1.5 text-xs text-zinc-400 leading-relaxed">
+                    <h5 className="font-extrabold text-white text-sm">혁신 수익화 발굴 AI의 압도적인 가성비</h5>
+                    <p>
+                      대면 창업 컨설팅이나 정교한 교육 보고서는 시중에서 수십만 원을 호가하지만, 본 AI 솔루션을 가동할 때는 <span className="text-emerald-400 font-bold">실속형(Flash) 모델 기준 2원 조차 넘지 않고</span>, <span className="text-yellow-500 font-bold">고급형(Pro) 모델 기준 약 60원</span>이라는 메리트 넘치는 초저예산으로 완전한 한 권 분량의 맞춤형 창업 기획서를 영구 소장해 가실 수 있습니다.
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-zinc-800/50 rounded-xl p-4">
-                  <h4 className="text-sm font-bold text-white mb-2 underline underline-offset-4 decoration-yellow-500/50 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-yellow-500" />
-                    수익화 가치 환산
-                  </h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    단돈 <span className="text-yellow-500 font-bold">몇 백원</span>으로 수백만원의 가치를 지닌 나만의 비즈니스 로드맵을 확보할 수 있습니다. 
-                    정혁신 AI는 가장 효율적인 비용으로 당신의 첫 수익화를 지원합니다!
+                {/* Disclaimer / Rates */}
+                <div className="bg-zinc-950/40 rounded-xl p-4 space-y-1.5 border border-zinc-900">
+                  <p className="text-[10px] text-zinc-500 leading-normal">
+                    * 실속형(Flash): 1M (100만) 토큰당 Input $0.075 / Output $0.30 기준 계산
+                  </p>
+                  <p className="text-[10px] text-zinc-500 leading-normal">
+                    * 고급형(Pro - 기본 적용 요율): 1M (100만) 토큰당 Input $3.5 / Output $10.5 기준 계산 (보수적 Context 기준)
+                  </p>
+                  <p className="text-[10px] text-zinc-500 leading-normal">
+                    * 원화 환산 환율: 1,400원 (환율 변동 및 사용 모델 버전에 따라 가격이 소폭 증감할 수 있습니다)
                   </p>
                 </div>
 
+              </div>
+
+              {/* Footer Button */}
+              <div className="mt-6 pt-4 border-t border-zinc-800 flex-shrink-0 flex justify-end">
                 <button
                   onClick={() => setShowCostModal(false)}
-                  className="w-full py-3 rounded-xl font-bold text-white bg-zinc-800 hover:bg-zinc-700 transition-all shadow-lg"
+                  className="w-full py-3.5 rounded-xl font-bold text-white bg-zinc-800 hover:bg-zinc-700 transition-all text-sm active:scale-[0.98] shadow-lg cursor-pointer"
                 >
                   닫기
                 </button>
