@@ -607,6 +607,110 @@ export default function App() {
     setTimeout(() => setShowSampleToast(false), 4000);
   };
 
+  const handleGenerate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
+      setError('모든 항목을 입력해주세요. 정확한 로드맵 설계를 위해 필요합니다.');
+      return;
+    }
+
+    setError('');
+    setLoading(true);
+    setResult('');
+    isGenerating.current = true;
+
+    try {
+      const prompt = `
+당신은 '정혁신'이 만든 '혁신 수익화 발굴 AI'입니다.
+AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 하나만 읽고 완벽히 원리를 파악하여 바로 나만의 수익화를 설계하고 실행할 수 있도록 정성스럽게 돕는 교육자이자 마스터 가이드입니다.
+
+사용자 정보:
+- 현재 직업/상황: ${currentStatus}
+- 관심사/좋아하는 분야: ${interest}
+- 현재 보유 기술/경험: ${skills}
+- 선호하는 작업 방식: ${workStyle}
+- 하루 투자 가능 시간: ${time}
+- 초기 투자 가능 자본금: ${capital}
+- 목표 월 수익: ${targetIncome}
+- 성향/성격: ${personality}
+- 사용 가능 기기/도구: ${tools}
+- 추가 고려사항/제약: ${constraints}
+- 수익화 시급도: ${urgency}
+- IT/디지털 숙련도: ${itSkill}
+- 기존 SNS/영향력: ${audience}
+- 위험 감수 성향: ${riskTolerance}
+- 가장 즐거움을 느끼는 활동: ${joy}
+
+위 정보를 바탕으로 아래에 나열된 모든 항목을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
+
+[출력 형식 및 스타일 가이드]
+- **중요: 마크다운 굵게 표시 기호인 '**'를 절대 사용하지 마세요.**
+- 모든 강조는 HTML <span style="..."> 태그만을 사용하여 표시하세요.
+- 최대한 자세하고 방대한 분량으로 가독성 좋게 작성해주세요.
+- 강조할 텍스트는 <span style="color: #1d4ed8; font-weight: bold;">진한 파란색</span>으로 작성하세요.
+- 매우 중요한 텍스트는 <span style="color: #dc2626; font-weight: bold;">빨간색</span>으로 작성하세요.
+- 꼭 참조해야 할 사항은 <span style="background-color: #fef08a; font-weight: bold; color: #1f2937;">노란색 배경</span>으로 작성하세요.
+- 마크다운 문법(헤더, 리스트 등)과 HTML 태그(span)를 적절히 혼용하여 시각적으로 훌륭한 문서를 만들어주세요.
+- [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
+- [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
+
+[보고서 필수 작성 대목]
+
+0. [초보자를 위한 가이드라인 도입부] 수익화 발굴의 3가지 대원칙 및 마케팅 상식 해설
+- AI와 마케팅을 처음하는 왕초보도 완벽하게 개념 수준부터 이해하고 납득할 수 있게 도와주세요.
+- 수익화가 탄생하는 핵심 메커니즘인 '가치 창출 (사람들이 원하는 무언가를 만드는 것)', '트래픽 확보 (사람들을 모으는 것)', '수익화 전환 (돈을 받고 가치를 전달하는 것)'을 오프라인의 '빵집 개업' 같은 아주 쉬운 일상 비유를 들어 쉽게 원리부터 설명해주세요.
+- 리포트에 사용되는 주요 마케팅 용어 사전(예: 트래픽=웹사이트나 SNS에 방문하는 사람들의 수/발길, 퍼스널 브랜딩=나라는 사람을 하나의 특별한 전문 상표로 만드는 과정, 유입=사람들이 내 글이나 서비스를 보러 들어오도록 유도하는 것, 수익화 전환=들어온 손님이 실제 결제까지 하도록 유도하는 것, 프롬프트=AI에게 내리는 구체적인 말 한마디이자 지시 명령어)을 먼저 이해하기 쉽고 친절하게 정리해 주고 보고서 본론으로 넘어가세요.
+
+1. 수익화 아이디어 브레인스토밍 (최소 3가지): 사용자의 상황에 최적화된, AI를 활용한 구체적인 수익화 아이디어
+2. 선택된 최적의 아이디어 1가지와 그 이유: 가장 현실적이고 효과적인 아이디어 선정 및 수익 창출 전략 상세 설명
+3. AI 왕초보자를 위한 맞춤형 가이드라인: 가이드라인만 따라 하면 누구든지 AI로 수익화를 할 수 있도록 매우 자세하고 디테일하며 쉽게 작성해주세요. 텍스트 생성 AI 툴로는 ChatGPT 대신 반드시 'Google Gemini'를 추천하고 활용법을 설명해야 합니다. Google Gemini에 어떻게 접속하고, 어떤 프롬프트를 입력해야 하는지 마우스 클릭 단위로 초등학생도 이해할 수 있게 설명해야 합니다.
+4. 단계별 실행 로드맵 (1주차 ~ 4주차 이상): 당장 오늘부터 시작할 수 있는 구체적인 Action Plan을 일차별/주차별로 아주 세밀하게 쪼개서 제공해주세요. **로드맵 초반에는 반드시 블로그 포스팅이 포함되어야 하며**, 블로그를 통해 초기 트래픽을 확보하고 퍼스널 브랜딩을 쌓는 과정을 필수로 포함하세요.
+
+어조는 전문가답고, 다정하게 교육적으로 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다. 이 보고서 자체만으로도 AI와 마케팅에 대한 든든한 온라인 입문 교과서 역할을 하도록 완성 가치를 끌어올려 주십시오.
+`;
+
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          clientApiKey: apiKey,
+          model: 'gemini-3-flash-preview',
+        }),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || 'AI 결과를 가져오는 중 오류가 발생했습니다.');
+      }
+
+      const resData = await response.json();
+      setResult(resData.text || '결과를 생성하지 못했습니다.');
+      
+      if (resData.usageMetadata) {
+        setUsage({
+          promptTokens: resData.usageMetadata.promptTokenCount || 0,
+          responseTokens: resData.usageMetadata.candidatesTokenCount || 0
+        });
+      }
+
+      isGenerating.current = false;
+    } catch (err) {
+      console.error(err);
+      let errorMessage = err instanceof Error ? err.message : String(err);
+      
+      if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
+        errorMessage = 'Gemini API 무료 할당량을 모두 사용했거나 결제 잔액이 부족합니다. \n잠시 후(약 1분 뒤) 다시 시도해보세요.';
+      }
+
+      setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCopyToDocs = async () => {
     if (!result) return;
     try {
@@ -657,132 +761,6 @@ export default function App() {
     setTempKey('');
     setShowKeyModal(false);
     alert('API Key가 초기화되었습니다. 이제 기본 무료 모드로 작동합니다.');
-  };
-
-  const handleGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentStatus || !interest || !skills || !workStyle || !time || !capital || !targetIncome || !personality || !tools || !constraints || !urgency || !itSkill || !audience || !riskTolerance || !joy) {
-      setError('모든 항목을 입력해주세요. 정확한 로드맵 설계를 위해 필요합니다.');
-      return;
-    }
-
-    const currentKey = apiKey || process.env.GEMINI_API_KEY;
-
-    if (!currentKey) {
-      setError('Google Gemini API Key를 설정해주세요.');
-      setTempKey(apiKey);
-      setShowKeyModal(true);
-      return;
-    }
-
-    setError('');
-    setLoading(true);
-    setResult('');
-    isGenerating.current = true;
-
-    try {
-      const ai = new GoogleGenAI({ apiKey: currentKey });
-      const prompt = `
-당신은 '정혁신'이 만든 '혁신 수익화 발굴 AI'입니다.
-AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 하나만 읽고 완벽히 원리를 파악하여 바로 나만의 수익화를 설계하고 실행할 수 있도록 정성스럽게 돕는 교육자이자 마스터 가이드입니다.
-
-사용자 정보:
-- 현재 직업/상황: ${currentStatus}
-- 관심사/좋아하는 분야: ${interest}
-- 현재 보유 기술/경험: ${skills}
-- 선호하는 작업 방식: ${workStyle}
-- 하루 투자 가능 시간: ${time}
-- 초기 투자 가능 자본금: ${capital}
-- 목표 월 수익: ${targetIncome}
-- 성향/성격: ${personality}
-- 사용 가능 기기/도구: ${tools}
-- 추가 고려사항/제약: ${constraints}
-- 수익화 시급도: ${urgency}
-- IT/디지털 숙련도: ${itSkill}
-- 기존 SNS/영향력: ${audience}
-- 위험 감수 성향: ${riskTolerance}
-- 가장 즐거움을 느끼는 활동: ${joy}
-
-위 정보를 바탕으로 아래에 나열된 모든 항목을 포함하여 마크다운 형식으로 **최대한 방대한 분량으로 매우 상세하게** 작성해주세요.
-
-[출력 형식 및 스타일 가이드]
-- **중요: 마크다운 굵게 표시 기호인 '**'를 절대 사용하지 마세요.**
-- 모든 강조는 HTML <span style="..."> 태그만을 사용하여 표시하세요.
-- 최대한 자세하고 방대한 분량으로 가독성 좋게 작성해주세요.
-- 강조할 텍스트는 <span style="color: #1d4ed8; font-weight: bold;">진한 파란색</span>으로 작성하세요.
-- 매우 중요한 텍스트는 <span style="color: #dc2626; font-weight: bold;">빨간색</span>으로 작성하세요.
-- 꼭 참조해야 할 사항은 <span style="background-color: #fef08a; font-weight: bold; color: #1f2937;">노란색 배경</span>으로 작성하세요.
-- 마크다운 문법(헤더, 리스트 등)과 HTML 태그(span)를 적절히 혼용하여 시각적으로 훌륭한 문서를 만들어주세요.
-- [금지 사항] "AI가 써준 글을 100% 그대로 복사-붙여넣기 하면 저품질 블로그로 낙인찍힌다"와 같은 부정적인 경고 문구는 절대 작성하지 마세요.
-- [권장 사항] 대신, "혁신 AI를 적극적으로 활용하여 당신만의 독창적인 콘텐츠와 가치를 창출해보세요!"와 같이 혁신 AI의 활용을 적극 권장하고 응원하는 긍정적인 메시지를 포함하세요.
-
-[보고서 필수 작성 대목]
-
-0. [초보자를 위한 가이드라인 도입부] 수익화 발굴의 3가지 대원칙 및 마케팅 상식 해설
-- AI와 마케팅을 처음하는 왕초보도 완벽하게 개념 수준부터 이해하고 납득할 수 있게 도와주세요.
-- 수익화가 탄생하는 핵심 메커니즘인 '가치 창출 (사람들이 원하는 무언가를 만드는 것)', '트래픽 확보 (사람들을 모으는 것)', '수익화 전환 (돈을 받고 가치를 전달하는 것)'을 오프라인의 '빵집 개업' 같은 아주 쉬운 일상 비유를 들어 쉽게 원리부터 설명해주세요.
-- 리포트에 사용되는 주요 마케팅 용어 사전(예: 트래픽=웹사이트나 SNS에 방문하는 사람들의 수/발길, 퍼스널 브랜딩=나라는 사람을 하나의 특별한 전문 상표로 만드는 과정, 유입=사람들이 내 글이나 서비스를 보러 들어오도록 유도하는 것, 수익화 전환=들어온 손님이 실제 결제까지 하도록 유도하는 것, 프롬프트=AI에게 내리는 구체적인 말 한마디이자 지시 명령어)을 먼저 이해하기 쉽고 친절하게 정리해 주고 보고서 본론으로 넘어가세요.
-
-1. 수익화 아이디어 브레인스토밍 (최소 3가지): 사용자의 상황에 최적화된, AI를 활용한 구체적인 수익화 아이디어
-2. 선택된 최적의 아이디어 1가지와 그 이유: 가장 현실적이고 효과적인 아이디어 선정 및 수익 창출 전략 상세 설명
-3. AI 왕초보자를 위한 맞춤형 가이드라인: 가이드라인만 따라 하면 누구든지 AI로 수익화를 할 수 있도록 매우 자세하고 디테일하며 쉽게 작성해주세요. 텍스트 생성 AI 툴로는 ChatGPT 대신 반드시 'Google Gemini'를 추천하고 활용법을 설명해야 합니다. Google Gemini에 어떻게 접속하고, 어떤 프롬프트를 입력해야 하는지 마우스 클릭 단위로 초등학생도 이해할 수 있게 설명해야 합니다.
-4. 단계별 실행 로드맵 (1주차 ~ 4주차 이상): 당장 오늘부터 시작할 수 있는 구체적인 Action Plan을 일차별/주차별로 아주 세밀하게 쪼개서 제공해주세요. **로드맵 초반에는 반드시 블로그 포스팅이 포함되어야 하며**, 블로그를 통해 초기 트래픽을 확보하고 퍼스널 브랜딩을 쌓는 과정을 필수로 포함하세요.
-
-어조는 전문가답고, 다정하게 교육적으로 동기를 부여하며, 극도로 구체적이고 실천 가능해야 합니다. 이 보고서 자체만으로도 AI와 마케팅에 대한 든든한 온라인 입문 교과서 역할을 하도록 완성 가치를 끌어올려 주십시오.
-`;
-
-      let text = '';
-      let aiResponse: any;
-      let retries = 3;
-      let delay = 2000;
-
-      while (retries > 0) {
-        try {
-          aiResponse = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: prompt,
-          });
-          text = aiResponse.text || '결과를 생성하지 못했습니다.';
-          break; // 성공 시 루프 탈출
-        } catch (err: any) {
-          const errMsg = err instanceof Error ? err.message : String(err);
-          if (errMsg.includes('503') || errMsg.includes('UNAVAILABLE') || errMsg.includes('high demand')) {
-            retries--;
-            if (retries === 0) {
-              throw new Error('현재 AI 모델의 사용량이 매우 많아 일시적으로 접근이 어렵습니다. (503 High Demand) 잠시 후 다시 시도해주세요.');
-            }
-            console.warn(`API error (503), retrying in ${delay}ms... (${3 - retries}/3)`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            delay *= 1.5; // 지수 백오프
-          } else {
-            throw err; // 다른 에러는 그대로 던짐
-          }
-        }
-      }
-      setResult(text);
-      
-      // 구체적인 사용량 정보 추출 (SDK 버전에 따라 다를 수 있음)
-      if (aiResponse.usageMetadata) {
-        setUsage({
-          promptTokens: aiResponse.usageMetadata.promptTokenCount || 0,
-          responseTokens: aiResponse.usageMetadata.candidatesTokenCount || 0
-        });
-      }
-
-      // Automatically trigger downloads is disabled as requested by the user.
-      isGenerating.current = false;
-    } catch (err) {
-      console.error(err);
-      let errorMessage = err instanceof Error ? err.message : String(err);
-      
-      if (errorMessage.includes('RESOURCE_EXHAUSTED') || errorMessage.includes('prepayment credits')) {
-        errorMessage = 'Gemini API 무료 할당량을 모두 사용했거나 결제 잔액이 부족합니다. \n잠시 후(약 1분 뒤) 다시 시도해보세요.';
-      }
-
-      setError(`AI 결과를 가져오는 중 오류가 발생했습니다: ${errorMessage}`);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleDownload = (content?: string) => {
