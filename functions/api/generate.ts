@@ -17,8 +17,12 @@ export const onRequestPost = async (context: any) => {
       });
     }
 
-    // Cloudflare env 변수 사용
-    const keyToUse = clientApiKey || context.env.GEMINI_API_KEY;
+    // Cloudflare env 변수 또는 KV 사용
+    let keyToUse = clientApiKey || context.env.GEMINI_API_KEY;
+    if (!keyToUse && context.env.ADMIN_KV) {
+      keyToUse = await context.env.ADMIN_KV.get('GEMINI_API_KEY');
+    }
+
     if (!keyToUse) {
       return new Response(JSON.stringify({ 
         error: "API Key가 설정되어 있지 않습니다. Cloudflare 설정 또는 직접 입력이 필요합니다." 
