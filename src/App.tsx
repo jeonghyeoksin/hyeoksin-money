@@ -931,13 +931,6 @@ AI 왕초보와 마케팅에 지식이 전혀 없는 입문자도 이 보고서 
                 API 비용
               </button>
               <button 
-                onClick={() => { setTempKey(apiKey); setShowKeyModal(true); }}
-                className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
-              >
-                <Settings className="w-3 h-3 text-red-500" />
-                API 설정
-              </button>
-              <button 
                 onClick={() => setShowGuideModal(true)}
                 className="text-xs bg-zinc-800 hover:bg-zinc-700 text-white px-3 py-1.5 rounded-full transition-colors flex items-center gap-1"
               >
